@@ -22,21 +22,22 @@ return function(FileBrowser)
 				Settings.NodeTall
 	end
 
-	local function GetExpanderBounds(Settings, X, Y, W, H, Padding, Depth)
+	-- X is the node's X from GetNodeBounds, which already has the depth in it
+	local function GetExpanderBounds(Settings, X, Y, W, H, Padding)
 		Padding = Padding or 0
 		local Size = Settings.ExpanderSize + Padding
 
-		return (Depth * Settings.NodeDepthWidth) + (X + Settings.ExpanderXOffset) - (Padding / 2), ((Y + (H / 2)) - (Size / 2)) + 1, Size, Size
+		return math.floor(X + Settings.ExpanderXOffset - (Padding / 2)), math.floor(Y + (H / 2) - (Size / 2)) + 1, Size, Size
 	end
 
-	local function GetIconBounds(Settings, X, Y, W, H, Padding, Depth)
+	local function GetIconBounds(Settings, X, Y, W, H, Padding)
 		local Size = Settings.IconSize + (Padding or 0)
 
-		return (Depth * Settings.NodeDepthWidth) + X + Settings.IconXOffset, (Y + (H / 2)) - (Size / 2), Size, Size
+		return math.floor(X + Settings.IconXOffset), math.floor(Y + (H / 2) - (Size / 2)), Size, Size
 	end
 
-	local function GetTextPosition(Settings, X, Y, W, H, Depth)
-		return (Depth * Settings.NodeDepthWidth) + X + Settings.TextXOffset, Y + (H / 2)
+	local function GetTextPosition(Settings, X, Y, W, H)
+		return math.floor(X + Settings.TextXOffset), math.floor(Y + (H / 2))
 	end
 
 	local ListTimeWidth, ListSizeWidth = 116, 72

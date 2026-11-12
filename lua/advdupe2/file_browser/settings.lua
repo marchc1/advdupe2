@@ -15,7 +15,7 @@ return function(FileBrowser)
 		{"MaxTimeToDoubleClick",      "maxtimetodoubleclick",         "0.25",              "Max time delta between clicks to count as a double click, in seconds.", 0, 1000000},
 		{"NodeTall",                  "nodetall",                     "24",                "How tall a single file/directory node is in the file browser, in pixels.", 0, 1000000},
 		{"NodePadding",               "nodepadding",                  "0",                 "The height padding inbetween two nodes, in pixels.", 0, 1000000},
-		{"NodeDepthWidth",            "nodedepthwidth",               "12",                "The width of a single node layet, in pixels. For example a file in folder1/folder2 has a depth of 2, so the pixel width, given the default value, will be (12 * 2) == 24.", 0, 1000000},
+		{"NodeDepthWidth",            "nodedepthwidth",               "12",                "The width of a single node layer, in pixels. For example a file in folder1/folder2 has a depth of 2, so the pixel width, given the default value, will be (12 * 2) == 24.", 0, 1000000},
 		{"NodeFont",                  "nodefont",                     "DermaDefault",      "The surface.CreateFont-registered font the file browser uses."},
 		{"NodeFontSmall",             "nodefontsmall",                "DefaultSmall",      "The surface.CreateFont-registered font the file browser uses for smaller fonts."},
 		{"IconFolderEmpty",           "nodeicon_folderempty",         "icon16/folder.png", "The materials/ localized path for an empty folder."},
@@ -73,11 +73,21 @@ return function(FileBrowser)
 	function SETTINGS:GetMaterial(Path)
 		local Mat = self.Materials[Path]
 		if not Mat then
-			Mat = Material(Path, "smooth")
+			Mat = Material(Path)
 			self.Materials[Path] = Mat
 		end
 
 		return Mat
+	end
+
+	function SETTINGS:ResetToDefaults()
+		for Key, ConVar in pairs(self.ConVars) do
+			if Key ~= "ViewType" then
+				ConVar:SetString(ConVar:GetDefault())
+			end
+		end
+
+		self:Flush()
 	end
 
 	function SETTINGS:GetViewType()
@@ -95,8 +105,8 @@ return function(FileBrowser)
 		self.PromptCloseTime      = ConVars.PromptCloseTime:GetFloat()
 
 		self.MaxTimeToDoubleClick = ConVars.MaxTimeToDoubleClick:GetFloat()
-		self.NodeTall             = ConVars.NodeTall:GetFloat()
-		self.NodePadding          = ConVars.NodePadding:GetFloat()
+		self.NodeTall             = math.max(ConVars.NodeTall:GetFloat(), 1)
+		self.NodePadding          = math.max(ConVars.NodePadding:GetFloat(), 0)
 		self.TallOfOneNode        = self.NodeTall + self.NodePadding
 		self.NodeDepthWidth       = ConVars.NodeDepthWidth:GetFloat()
 		self.NodeFont             = ConVars.NodeFont:GetString()

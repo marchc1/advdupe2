@@ -111,8 +111,6 @@ return function(FileBrowser)
 			end
 		end
 
-		Menu:SetAlpha(0)
-		Menu:AlphaTo(255, 0.1, 0)
 		Menu:Open()
 	end
 
@@ -461,7 +459,7 @@ return function(FileBrowser)
 				local MouseInRect = ImmediateState:IsMouseInRect(X, Y, W, H) and ImmediateState.PanelHovered
 				if MouseInRect then
 					ImmediateState.Hovered           = Node
-					ImmediateState.IsExpanderHovered = IsTree and Node:IsFolder() and ImmediateState:IsMouseInRect(GetExpanderBounds(Settings, X, Y, W, H, nil, Node.Depth))
+					ImmediateState.IsExpanderHovered = IsTree and Node:IsFolder() and ImmediateState:IsMouseInRect(GetExpanderBounds(Settings, X, Y, W, H))
 
 					if ImmediateState.Mouse.Clicked then
 						ImmediateState.Depressed           = Node
@@ -541,7 +539,7 @@ return function(FileBrowser)
 		return Settings.IconFile
 	end
 
-	function BROWSERTREE:PaintNodeBackground(Skin, Node, IsHovered, IsDepressed, X, Y, W, H, Always)
+	function BROWSERTREE:PaintNodeBackground(Skin, Node, IsHovered, IsDepressed, X, Y, W, H)
 		local State = "Normal"
 		if IsDepressed then
 			State = "Dark"
@@ -553,7 +551,7 @@ return function(FileBrowser)
 			State = "Hovered"
 		end
 
-		if State == "Normal" and not Always then
+		if State == "Normal" then
 			return GetStateTextColor(Skin, State)
 		end
 
@@ -585,16 +583,16 @@ return function(FileBrowser)
 
 					surface.SetDrawColor(255, 255, 255, 255)
 					surface.SetMaterial(GetNodeIcon(Settings, Node))
-					surface.DrawTexturedRect(NX + ((NW - Settings.TileIconSize) / 2), NY + 8, Settings.TileIconSize, Settings.TileIconSize)
+					surface.DrawTexturedRect(math.floor(NX + ((NW - Settings.TileIconSize) / 2)), math.floor(NY + 8), Settings.TileIconSize, Settings.TileIconSize)
 
 					draw.SimpleText(TruncateText(Node.Text or "", Settings.NodeFont, NW - 8), Settings.NodeFont, NX + (NW / 2), NY + 14 + Settings.TileIconSize, TextColor, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
 				elseif ViewType == VIEWTYPE_LIST then
-					local TextColor = self:PaintNodeBackground(Skin, Node, IsHovered, IsDepressed, NX, NY, NW, NH, true)
+					local TextColor = self:PaintNodeBackground(Skin, Node, IsHovered, IsDepressed, NX, NY, NW, NH)
 
-					local TextY = NY + (NH / 2)
+					local TextY = math.floor(NY + (NH / 2))
 					surface.SetDrawColor(255, 255, 255, 255)
 					surface.SetMaterial(GetNodeIcon(Settings, Node))
-					surface.DrawTexturedRect(NX + Settings.LeftmostToExpanderPadding, TextY - (Settings.IconSize / 2), Settings.IconSize, Settings.IconSize)
+					surface.DrawTexturedRect(math.floor(NX + Settings.LeftmostToExpanderPadding), math.floor(TextY - (Settings.IconSize / 2)), Settings.IconSize, Settings.IconSize)
 
 					local TextX = NX + GetListTextX(Settings)
 					draw.SimpleText(TruncateText(Node.Text or "", Settings.NodeFont, NameRight - TextX - 8), Settings.NodeFont, TextX, TextY, TextColor, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
@@ -604,12 +602,12 @@ return function(FileBrowser)
 					local IsExpanderHovered   = IsHovered and ImmediateState.IsExpanderHovered
 					local IsExpanderDepressed = IsDepressed and ImmediateState.IsExpanderDepressed
 
-					local IX, IY, IW, IH      = GetIconBounds(Settings, NX, NY, NW, NH, nil, Node.Depth)
-					local EX, EY, EW, EH      = GetExpanderBounds(Settings, NX, NY, NW, NH, IsExpanderDepressed and -2 or IsExpanderHovered and 2 or 0, Node.Depth)
-					local TextX, TextY        = GetTextPosition(Settings, NX, NY, NW, NH, Node.Depth)
+					local IX, IY, IW, IH      = GetIconBounds(Settings, NX, NY, NW, NH)
+					local EX, EY, EW, EH      = GetExpanderBounds(Settings, NX, NY, NW, NH, IsExpanderDepressed and -2 or IsExpanderHovered and 2 or 0)
+					local TextX, TextY        = GetTextPosition(Settings, NX, NY, NW, NH)
 
 					-- Paint background
-					local TextColor = self:PaintNodeBackground(Skin, Node, IsHovered, IsDepressed, NX, NY, NW, NH, true)
+					local TextColor = self:PaintNodeBackground(Skin, Node, IsHovered, IsDepressed, NX, NY, NW, NH)
 
 					-- Paint expander
 					if Node:IsFolder() and Node:Count() > 0 then
@@ -635,11 +633,9 @@ return function(FileBrowser)
 
 		ImmediateState.BlockingAlpha = math.Clamp((ImmediateState.BlockingAlpha or 0) + (ImmediateState.DeltaTime * 4 * (ImmediateState.CanInput and -1 or 1)), 0, 1)
 		if ImmediateState.BlockingAlpha > 0 then
-			local Alpha = math.ease.InOutQuad(ImmediateState.BlockingAlpha) * 66
-			local OldClipping = DisableClipping(true)
-			surface.SetDrawColor(0, 0, 0, Alpha)
-			surface.DrawRect(0, 0, self.Browser:GetSize())
-			DisableClipping(OldClipping)
+			-- The tree is at least as tall as the browser, so this covers it without unclipping
+			surface.SetDrawColor(0, 0, 0, ImmediateState.BlockingAlpha * 66)
+			surface.DrawRect(0, 0, PanelWidth, self.Browser:GetTall())
 		end
 	end
 

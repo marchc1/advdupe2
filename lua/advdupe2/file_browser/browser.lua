@@ -6,12 +6,15 @@ return function(FileBrowser)
 	local USERPROMPT            = FileBrowser.USERPROMPT
 	local IsAttached            = FileBrowser.IsAttached
 	local GetSkinTextColor      = FileBrowser.GetSkinTextColor
+	local DrawSkinPanel         = FileBrowser.DrawSkinPanel
+	local PaintUserPrompt       = FileBrowser.PaintUserPrompt
 
 	local BROWSER = {}
-	AccessorFunc(BROWSER, "m_bBackground", "PaintBackground", FORCE_BOOL)
-	AccessorFunc(BROWSER, "m_bgColor", "BackgroundColor")
-	Derma_Hook(BROWSER, "Paint", "Paint", "Panel")
 	Derma_Hook(BROWSER, "PerformLayout", "Layout", "Panel")
+
+	function BROWSER:Paint(w, h)
+		DrawSkinPanel(self:GetSkin(), "Normal", 0, 0, w, h)
+	end
 
 	local setbrowserpnlsize
 	local function SetBrowserPnlSize(self, x, y)
@@ -26,10 +29,8 @@ return function(FileBrowser)
 		self.SetSize = SetBrowserPnlSize
 		self.TreeView = vgui.CreateFromTable(FileBrowser.TreeTable, self)
 
-		self:SetPaintBackground(true)
 		self:SetPaintBackgroundEnabled(false)
 		self:SetPaintBorderEnabled(false)
-		self:SetBackgroundColor(self:GetSkin().text_bright)
 	end
 
 	function BROWSER:Setup(Settings)
@@ -890,8 +891,8 @@ return function(FileBrowser)
 		end
 	end
 
-	local WORLD  = Material("icon16/world.png", "smooth")
-	local FOLDER = Material("icon16/folder.png", "smooth")
+	local WORLD  = Material("icon16/world.png")
+	local FOLDER = Material("icon16/folder.png")
 	local PAGE   = Material("icon16/page.png", "smooth")
 
 	function BROWSER:ShowSavePrompt()
@@ -907,7 +908,6 @@ return function(FileBrowser)
 			return W / 1.5, 128
 		end
 		BrowserWait:SetBlocking(true)
-		BrowserWait.Panel:SetPaintBackground(true)
 
 		local Text = BrowserWait.Panel:Add("DLabel")
 		Text:SetText("Downloading...")
@@ -917,8 +917,8 @@ return function(FileBrowser)
 		Text:SetContentAlignment(8)
 
 		function BrowserWait.Panel:Paint(w, h)
-			DPanel.Paint(self, w, h)
-			local AnimTime = 1.5
+			PaintUserPrompt(self, w, h)
+			local AnimTime = 0.5
 			local Time = (UserInterfaceTimeFunc() % AnimTime) / AnimTime
 			local SinTime = math.sin(Time * math.pi)
 			local Size = math.ease.OutQuad(SinTime) * 32
@@ -983,9 +983,12 @@ return function(FileBrowser)
 				local W, H = Panel:GetSize()
 				local Dock = Prompt.Dock
 
-				if Dock ~= NODOCK and Dock ~= FILL then
-					if Dock == TOP or Dock == BOTTOM then
+				if Dock ~= NODOCK and Dock ~= FILL and not Prompt.Cover then
+					if Dock == TOP then
 						Y = Y + StackDocks[Dock]
+						StackDocks[Dock] = StackDocks[Dock] + H + DockPadding
+					elseif Dock == BOTTOM then
+						Y = Y - StackDocks[Dock]
 						StackDocks[Dock] = StackDocks[Dock] + H + DockPadding
 					else
 						X = X + StackDocks[Dock]

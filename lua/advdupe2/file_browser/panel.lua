@@ -15,10 +15,11 @@ return function(FileBrowser)
 	local GetStateTextColor = FileBrowser.GetStateTextColor
 
 	local PANEL = {}
-	AccessorFunc(PANEL, "m_bBackground", "PaintBackground", FORCE_BOOL)
-	AccessorFunc(PANEL, "m_bgColor", "BackgroundColor")
-	Derma_Hook(PANEL, "Paint", "Paint", "Panel")
 	Derma_Hook(PANEL, "PerformLayout", "Layout", "Panel")
+
+	function PANEL:Paint(w, h)
+		DrawSkinPanel(self:GetSkin(), "Panel", 0, 0, w, h)
+	end
 
 	function PANEL:PerformLayout(w, h)
 		if not self.Browser then return end
@@ -50,7 +51,7 @@ return function(FileBrowser)
 		if self.LeftsideButtons then
 			BtnX = BtnPad
 			for _, Button in ipairs(self.LeftsideButtons) do
-				Button:SetPos(BtnX, 4)
+				Button:SetPos(BtnX, 4 + (Button.OffsetY or 0))
 				BtnX = BtnX + Button:GetWide() + BtnPad
 			end
 		end
@@ -59,7 +60,7 @@ return function(FileBrowser)
 			BtnX = w
 			for _, Button in ipairs(self.RightsideButtons) do
 				BtnX = BtnX - Button:GetWide() - BtnPad
-				Button:SetPos(BtnX, 4)
+				Button:SetPos(BtnX, 4 + (Button.OffsetY or 0))
 			end
 		end
 	end
@@ -175,7 +176,7 @@ return function(FileBrowser)
 			for _, Item in ipairs(self.Items) do
 				if Item.ClassName == "DLabel" and not Item:IsHovered() then Item:SetTextColor(TextColor) end
 			end
-			self.Ellipsis:SetTextColor(TextColor)
+			if not self.Ellipsis:IsHovered() then self.Ellipsis:SetTextColor(TextColor) end
 		end
 
 		local function PaintSegment(Segment, w, h)
@@ -196,6 +197,17 @@ return function(FileBrowser)
 		end
 
 		Path.Ellipsis = AddLabel("...")
+		Path.Ellipsis:SetMouseInputEnabled(true)
+		Path.Ellipsis:SetTooltip("Hidden folders")
+		Path.Ellipsis:SetTooltipDelay(0)
+		Path.Ellipsis.Paint = PaintSegment
+		Path.Ellipsis.DoClick = function()
+			local Menu = DermaMenu()
+			for _, Node in ipairs(Path.Hidden or {}) do
+				Menu:AddOption(Node.Text or "", function() Browser:NavigateTo(Node) end):SetIcon("icon16/folder.png")
+			end
+			Menu:Open()
+		end
 
 		local function AddSegment(Node)
 			local Segment
@@ -211,6 +223,7 @@ return function(FileBrowser)
 				Segment:SetMouseInputEnabled(true)
 			end
 
+			Segment.Node    = Node
 			Segment.Paint   = PaintSegment
 			Segment.DoClick = function() Browser:NavigateTo(Node) end
 			Path.Items[#Path.Items + 1] = Segment
@@ -272,11 +285,13 @@ return function(FileBrowser)
 			self.Ellipsis:SetVisible(First > 2)
 			if First > 2 then Place(self.Ellipsis) end
 
+			self.Hidden = {}
 			for I = 2, #Items do
 				if I >= First then
 					Place(Items[I])
 				else
 					Items[I]:SetVisible(false)
+					if Items[I].Node then self.Hidden[#self.Hidden + 1] = Items[I].Node end
 				end
 			end
 		end
@@ -381,9 +396,7 @@ return function(FileBrowser)
 	end
 
 	function PANEL:Init()
-		self:SetPaintBackground(true)
 		self:SetPaintBackgroundEnabled(false)
-		self:SetBackgroundColor(self:GetSkin().bg_color_bright)
 	end
 
 	function PANEL:Setup(Settings)
@@ -399,6 +412,7 @@ return function(FileBrowser)
 		self.SearchAll     = self:AddLeftsideButton("folder_magnify", "Search all root folders", function()
 			self.Browser:StartSearch(self.Browser.TreeView)
 		end)
+		self.SearchAll.OffsetY = -1 -- the icon sits low
 		do
 			self:AddLeftsideDivider()
 			self.SwitchToTree  = self:AddLeftsideButton("application_side_tree", "Tree view", function() self.Browser:SetViewType(VIEWTYPE_TREE) end)
@@ -452,29 +466,34 @@ return function(FileBrowser)
 		self.SettingsPanel = Panel
 
 		Panel:SetBlocking(true)
-		Panel:SetDock(BOTTOM)
+		Panel:SetDock(FILL)
+		Panel:SetCover(true)
+		Panel.Panel:GetCanvas():DockPadding(8, 4, 8, 8)
+
+		-- Same split as DNumSlider so every row lines up
+		local function SetLabelWidth(Row, Label)
+			Row.PerformLayout = function(_, w) Label:SetWide(w / 2.4) end
+		end
 
 		local function CreateDivider()
 			local Div = Panel:Add("DPanel")
 			Div:Dock(TOP)
-			Div:DockMargin(16, 4, 16, 4)
-			Div:SetSize(0, 2)
-			Div.Paint = function(Divider, w, h) surface.SetDrawColor(GetSkinTextColor(Divider:GetSkin(), 90)) surface.DrawRect(0, 0, w, h) end
+			Div:DockMargin(0, 4, 0, 4)
+			Div:SetTall(1)
+			Div.Paint = function(Divider, w, h) surface.SetDrawColor(GetSkinTextColor(Divider:GetSkin(), 50)) surface.DrawRect(0, 0, w, h) end
 		end
-		local function CreateConvarSlider(ConVar, CName, Min, Max)
-			local CV = GetConVar(ConVar)
-			local Name = Panel:Add("DLabel")
-			Name:Dock(TOP)
-			Name:SetText(CName or CV:GetName())
-			Name:SetDark(true)
-			Name:SetTextInset(8, 0)
-			Name:SetTooltip(CV:GetHelpText())
+
+		local function CreateConvarSlider(Key, Text, Min, Max, Decimals)
+			local CV = Settings:GetConVar(Key)
+
 			local Slider = Panel:Add("DNumSlider")
-			Slider:SetDark(true)
 			Slider:Dock(TOP)
-			Slider:SetSize(0, 14)
-			Slider:SetConVar(ConVar)
-			Slider:SetMinMax(Min or CV:GetMin(), Max or CV:GetMax())
+			Slider:SetText(Text)
+			Slider:SetDark(true)
+			Slider:SetMinMax(Min, Max)
+			Slider:SetDecimals(Decimals or 0)
+			Slider:SetConVar(CV:GetName())
+			Slider:SetTooltip(CV:GetHelpText())
 			Slider.Scratch.PaintScratchWindow = function(s)
 				if not s:GetActive() then return end
 				if s:GetZoom() == 0 then s:SetZoom(s:IdealZoom()) end
@@ -495,68 +514,100 @@ return function(FileBrowser)
 				if render then render.SetScissorRect(x, y, w, h, false) end
 			end
 		end
-		local function CreateConvarEntry(ConVar, CName)
-			local CV = GetConVar(ConVar)
-			local Name = Panel:Add("DLabel")
-			Name:Dock(TOP)
-			Name:SetText(CName or CV:GetName())
+
+		local function CreateConvarEntry(Key, Text)
+			local CV = Settings:GetConVar(Key)
+
+			local Row = Panel:Add("Panel")
+			Row:Dock(TOP)
+			Row:DockMargin(0, 4, 0, 4)
+			Row:SetTall(20)
+
+			local Name = Row:Add("DLabel")
+			Name:Dock(LEFT)
+			Name:SetText(Text)
 			Name:SetDark(true)
-			Name:SetTextInset(8, 0)
+			Name:SetMouseInputEnabled(true)
 			Name:SetTooltip(CV:GetHelpText())
-			local Entry = Panel:Add("DTextEntry")
-			Entry:Dock(TOP)
-			Entry:SetSize(0, 20)
-			Entry:DockMargin(8, 0, 8, 0)
-			Entry:SetConVar(ConVar)
-			return Entry
+			SetLabelWidth(Row, Name)
+
+			local Entry = Row:Add("DTextEntry")
+			Entry:Dock(FILL)
+			Entry:SetConVar(CV:GetName())
+
+			return Row, CV
 		end
-		local function CreateConvarIconEntry(ConVar, CName)
-			local Entry = CreateConvarEntry(ConVar, CName)
-			local CV    = GetConVar(ConVar)
 
-			local IconSelector = Entry:Add("DImageButton")
-			IconSelector:SetSize(16, 16)
-			IconSelector:DockMargin(2, 2, 2, 2)
-			IconSelector:Dock(RIGHT)
-			IconSelector:SetImage(CV:GetString())
+		local function CreateConvarIconEntry(Key, Text)
+			local Row, CV = CreateConvarEntry(Key, Text)
 
-			IconSelector.DoClick = function()
+			local Pick = Row:Add("DButton")
+			Pick:SetText("")
+			Pick:Dock(RIGHT)
+			Pick:DockMargin(4, 0, 0, 0)
+			Pick:SetWide(Row:GetTall())
+			Pick:SetTooltip("Pick an icon")
+
+			local Icon = Pick:Add("DImage")
+			Icon:SetSize(16, 16)
+			Icon:SetMouseInputEnabled(false)
+
+			function Pick:PerformLayout(w, h)
+				Icon:SetPos(math.floor((w - 16) / 2), math.floor((h - 16) / 2))
+			end
+
+			function Pick:Think()
+				local Path = CV:GetString()
+				if Path ~= self.IconPath then
+					self.IconPath = Path
+					Icon:SetImage(Path)
+				end
+			end
+
+			function Pick:DoClick()
 				local Frame = vgui.Create("DFrame")
-				Frame:MakePopup()
+				Frame:SetTitle(Text)
 				Frame:SetSize(480, 360)
 				Frame:Center()
+				Frame:MakePopup()
 
 				local Icons = Frame:Add("DIconBrowser")
 				Icons:Dock(FILL)
 				Icons:SelectIcon(CV:GetString())
 				Icons.OnChange = function()
 					CV:SetString(Icons:GetSelectedIcon())
-					IconSelector:SetImage(Icons:GetSelectedIcon())
 				end
 			end
 		end
 
-		CreateConvarSlider(Settings:GetConVarName("PromptOpenTime"), "Prompt Open Animation Time (seconds)", 0, 2)
-		CreateConvarSlider(Settings:GetConVarName("PromptCloseTime"), "Prompt Close Animation Time (seconds)", 0, 2)
+		CreateConvarSlider("PromptOpenTime", "Prompt Open Time", 0, 1, 2)
+		CreateConvarSlider("PromptCloseTime", "Prompt Close Time", 0, 1, 2)
+		CreateConvarSlider("MaxTimeToDoubleClick", "Double Click Time", 0.1, 1, 2)
 		CreateDivider()
-		CreateConvarSlider(Settings:GetConVarName("MaxTimeToDoubleClick"), "Max Deltatime for Double Clicks (seconds)", 0, 2)
-		CreateConvarSlider(Settings:GetConVarName("NodeTall"), "Node Height (pixels)", 0, 256)
-		CreateConvarSlider(Settings:GetConVarName("NodePadding"), "Node Height Padding (pixels)", 0, 256)
-		CreateConvarSlider(Settings:GetConVarName("NodeDepthWidth"), "Node Depth Width (pixels)", 0, 256)
+		CreateConvarSlider("NodeTall", "Node Height", 12, 64)
+		CreateConvarSlider("NodePadding", "Node Spacing", 0, 16)
+		CreateConvarSlider("NodeDepthWidth", "Indent Width", 0, 64)
 		CreateDivider()
-		CreateConvarEntry(Settings:GetConVarName("NodeFont"), "Node Font")
+		CreateConvarEntry("NodeFont", "Font")
+		CreateConvarIconEntry("IconFolderEmpty", "Empty Folder Icon")
+		CreateConvarIconEntry("IconFolderContains", "Folder Icon")
+		CreateConvarIconEntry("IconFile", "File Icon")
 		CreateDivider()
-		CreateConvarIconEntry(Settings:GetConVarName("IconFolderEmpty"), "Node Empty Folder Icon")
-		CreateConvarIconEntry(Settings:GetConVarName("IconFolderContains"), "Node Folder Icon")
-		CreateConvarIconEntry(Settings:GetConVarName("IconFile"), "Node File Icon")
+		CreateConvarSlider("ExpanderSize", "Expander Size", 8, 32)
+		CreateConvarSlider("IconSize", "Icon Size", 8, 64)
+		CreateConvarSlider("LeftmostToExpanderPadding", "Expander Padding", 0, 32)
+		CreateConvarSlider("ExpanderToIconPadding", "Icon Padding", 0, 32)
+		CreateConvarSlider("IconToTextPadding", "Text Padding", 0, 32)
 		CreateDivider()
-		CreateConvarSlider(Settings:GetConVarName("ExpanderSize"), "Node Expander Size (pixels)", 0, 256)
-		CreateConvarSlider(Settings:GetConVarName("IconSize"), "Node Icon Size (pixels)", 0, 256)
-		CreateConvarSlider(Settings:GetConVarName("LeftmostToExpanderPadding"), "Left -> Expander Padding (pixels)", 0, 256)
-		CreateConvarSlider(Settings:GetConVarName("ExpanderToIconPadding"), "Expander -> Icon Padding (pixels)", 0, 256)
-		CreateConvarSlider(Settings:GetConVarName("IconToTextPadding"), "Icon -> Text Padding (pixels)", 0, 256)
+		CreateConvarSlider("TileIconSize", "Tile Icon Size", 16, 128)
 		CreateDivider()
-		CreateConvarSlider(Settings:GetConVarName("TileIconSize"), "Tile Icon Size (pixels)", 8, 128)
+
+		local Reset = Panel:Add("DButton")
+		Reset:Dock(TOP)
+		Reset:DockMargin(0, 4, 0, 0)
+		Reset:SetTall(22)
+		Reset:SetText("Reset to Defaults")
+		Reset.DoClick = function() Settings:ResetToDefaults() end
 	end
 
 	FileBrowser.PanelTable = vgui.RegisterTable(PANEL, "Panel")
