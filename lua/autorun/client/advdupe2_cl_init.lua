@@ -27,8 +27,8 @@ net.Receive("AdvDupe2Notify", function()
 	AdvDupe2.Notify(net.ReadString(), net.ReadUInt(8), net.ReadFloat())
 end)
 
-AdvDupe2.AREA_ADVDUPE2   = 0
-AdvDupe2.AREA_PUBLIC     = 1
-AdvDupe2.AREA_ADVDUPE1   = 2
+AdvDupe2.AREA_ADVDUPE2 = 0
+AdvDupe2.AREA_PUBLIC = 1
+AdvDupe2.AREA_ADVDUPE1 = 2
 
 include( "advdupe2/cl_file_browser.lua" )

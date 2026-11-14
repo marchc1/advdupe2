@@ -1,23 +1,23 @@
 return function(FileBrowser)
-	local VIEWTYPE_TREE         = FileBrowser.VIEWTYPE_TREE
-	local VIEWTYPE_LIST         = FileBrowser.VIEWTYPE_LIST
-	local VIEWTYPE_TILES        = FileBrowser.VIEWTYPE_TILES
-	local SORTTYPE_NAME         = FileBrowser.SORTTYPE_NAME
-	local SORTTYPE_TIME         = FileBrowser.SORTTYPE_TIME
-	local SORTTYPE_SIZE         = FileBrowser.SORTTYPE_SIZE
+	local VIEWTYPE_TREE = FileBrowser.VIEWTYPE_TREE
+	local VIEWTYPE_LIST = FileBrowser.VIEWTYPE_LIST
+	local VIEWTYPE_TILES = FileBrowser.VIEWTYPE_TILES
+	local SORTTYPE_NAME = FileBrowser.SORTTYPE_NAME
+	local SORTTYPE_TIME = FileBrowser.SORTTYPE_TIME
+	local SORTTYPE_SIZE = FileBrowser.SORTTYPE_SIZE
 	local UserInterfaceTimeFunc = FileBrowser.UserInterfaceTimeFunc
-	local GetNodeBounds         = FileBrowser.GetNodeBounds
-	local GetExpanderBounds     = FileBrowser.GetExpanderBounds
-	local GetIconBounds         = FileBrowser.GetIconBounds
-	local GetTextPosition       = FileBrowser.GetTextPosition
-	local GetListColumns        = FileBrowser.GetListColumns
-	local GetListTextX          = FileBrowser.GetListTextX
-	local TruncateText          = FileBrowser.TruncateText
-	local GetNumericalFilename  = FileBrowser.GetNumericalFilename
-	local NODE                  = FileBrowser.NODE
-	local DrawSkinExpander      = FileBrowser.DrawSkinExpander
-	local DrawSkinState         = FileBrowser.DrawSkinState
-	local GetStateTextColor     = FileBrowser.GetStateTextColor
+	local GetNodeBounds = FileBrowser.GetNodeBounds
+	local GetExpanderBounds = FileBrowser.GetExpanderBounds
+	local GetIconBounds = FileBrowser.GetIconBounds
+	local GetTextPosition = FileBrowser.GetTextPosition
+	local GetListColumns = FileBrowser.GetListColumns
+	local GetListTextX = FileBrowser.GetListTextX
+	local TruncateText = FileBrowser.TruncateText
+	local GetNumericalFilename = FileBrowser.GetNumericalFilename
+	local NODE = FileBrowser.NODE
+	local DrawSkinExpander = FileBrowser.DrawSkinExpander
+	local DrawSkinState = FileBrowser.DrawSkinState
+	local GetStateTextColor = FileBrowser.GetStateTextColor
 
 	-- This is the base browser panel. Most VGUI interactions happen here
 
@@ -40,12 +40,12 @@ return function(FileBrowser)
 
 		-- Implement NODE
 		NODE.InjectIntoBrowser(self, self:GetParent())
-		self.KeepOrder         = true
-		self.SortDirty         = true
+		self.KeepOrder = true
+		self.SortDirty = true
 		self.ExpandedNodeArray = {}
-		self.CurrentFolder     = self
-		self.BackHistory       = {}
-		self.ForwardHistory    = {}
+		self.CurrentFolder = self
+		self.BackHistory = {}
+		self.ForwardHistory = {}
 
 		self.LastClick = UserInterfaceTimeFunc()
 		self.VBar.OldPaint = self.VBar.Paint
@@ -78,7 +78,7 @@ return function(FileBrowser)
 	function BROWSERTREE:DoNodeRightClick(Node)
 		self:SetSelected(Node)
 
-		local Menu     = DermaMenu()
+		local Menu = DermaMenu()
 		local RootImpl = Node.Root.RootImpl
 
 		function Menu:AddOption(Text, Func, Icon)
@@ -97,7 +97,7 @@ return function(FileBrowser)
 		end
 
 		if self:IsSearching() then
-			Menu:AddOption("Open",    function() RootImpl:UserLoad(self.Browser, Node)    end, "icon16/page_go.png")
+			Menu:AddOption("Open", function() RootImpl:UserLoad(self.Browser, Node) end, "icon16/page_go.png")
 			Menu:AddOption("Preview", function() RootImpl:UserPreview(self.Browser, Node) end, "icon16/information.png")
 		else
 			RootImpl:UserMenu(self.Browser, Node, Menu)
@@ -268,7 +268,7 @@ return function(FileBrowser)
 			-- functions
 
 			function ImmediateState:IsMouseInRect(X, Y, W, H)
-				local MX, MY         = self.MouseX or 0, self.MouseY or 0
+				local MX, MY = self.MouseX or 0, self.MouseY or 0
 				return (MX >= X and MX <= (X + W)) and (MY >= Y and MY <= (Y + H))
 			end
 		end
@@ -313,10 +313,10 @@ return function(FileBrowser)
 	function BROWSERTREE:GetIndexBounds(Index, Scroll, Width, Depth)
 		local Settings = self.Settings
 		if self.ViewType == VIEWTYPE_TILES then
-			local Columns   = self:GetTileColumns()
+			local Columns = self:GetTileColumns()
 			local CellWidth = (Width - self.VBar:GetWide()) / Columns
-			local Column    = (Index - 1) % Columns
-			local Row       = math.floor((Index - 1) / Columns)
+			local Column = (Index - 1) % Columns
+			local Row = math.floor((Index - 1) / Columns)
 
 			return Column * CellWidth, (Row * Settings.TileHeight) - Scroll, CellWidth, Settings.TileHeight
 		end
@@ -329,9 +329,9 @@ return function(FileBrowser)
 		local Count = #self.ExpandedNodeArray
 
 		if self.ViewType == VIEWTYPE_TILES then
-			local Columns  = self:GetTileColumns()
+			local Columns = self:GetTileColumns()
 			local FirstRow = math.floor(Scroll / Settings.TileHeight)
-			local LastRow  = math.floor((Scroll + ViewHeight) / Settings.TileHeight)
+			local LastRow = math.floor((Scroll + ViewHeight) / Settings.TileHeight)
 
 			return (FirstRow * Columns) + 1, math.min((LastRow + 1) * Columns, Count)
 		end
@@ -359,7 +359,7 @@ return function(FileBrowser)
 		end
 
 		self.SearchResults = Results
-		self.SortDirty     = true
+		self.SortDirty = true
 		self.VBar:SetScroll(0)
 
 		return #Results
@@ -369,7 +369,7 @@ return function(FileBrowser)
 		if not self.SearchResults then return end
 
 		self.SearchResults = nil
-		self.SortDirty     = true
+		self.SortDirty = true
 		self:SortRecheck()
 		self.VBar:SetScroll(self.ScrollBeforeSearch or 0)
 		self.ScrollBeforeSearch = nil
@@ -382,24 +382,24 @@ return function(FileBrowser)
 		local Settings = self.Settings
 		local ImmediateState = self:GetImmediateState()
 
-		local Scroll         = IsValid(self.VBar) and (self.VBar:GetScroll()) or 0
+		local Scroll = IsValid(self.VBar) and (self.VBar:GetScroll()) or 0
 
 		local MouseX, MouseY = self:CursorPos()
-		local CanInput       = self:IsMouseInputEnabled()
-		local Now            = UserInterfaceTimeFunc()
+		local CanInput = self:IsMouseInputEnabled()
+		local Now = UserInterfaceTimeFunc()
 
-		ImmediateState.LastTime     = ImmediateState.Time or Now
-		ImmediateState.Time         = Now
-		ImmediateState.DeltaTime    = ImmediateState.Time - ImmediateState.LastTime
+		ImmediateState.LastTime = ImmediateState.Time or Now
+		ImmediateState.Time = Now
+		ImmediateState.DeltaTime = ImmediateState.Time - ImmediateState.LastTime
 
 		ImmediateState.Mouse.Cursor = "arrow"
-		ImmediateState.LastScroll   = ImmediateState.Scroll or Scroll
-		ImmediateState.Scroll       = Scroll
-		ImmediateState.DeltaScroll  = Scroll - ImmediateState.LastScroll
-		ImmediateState.CanInput     = CanInput
+		ImmediateState.LastScroll = ImmediateState.Scroll or Scroll
+		ImmediateState.Scroll = Scroll
+		ImmediateState.DeltaScroll = Scroll - ImmediateState.LastScroll
+		ImmediateState.CanInput = CanInput
 
-		ImmediateState.Width        = self:GetWide()
-		ImmediateState.Height       = self:GetTall()
+		ImmediateState.Width = self:GetWide()
+		ImmediateState.Height = self:GetTall()
 
 		for I = MOUSE_LEFT, MOUSE_LAST do
 			local Mouse = ImmediateState.Mouse[I]
@@ -409,13 +409,13 @@ return function(FileBrowser)
 			end
 
 			Mouse.LastDown = Mouse.Down or false
-			Mouse.Down     = input.IsMouseDown(I) and CanInput
-			Mouse.Clicked  = Mouse.Down and not Mouse.LastDown
+			Mouse.Down = input.IsMouseDown(I) and CanInput
+			Mouse.Clicked = Mouse.Down and not Mouse.LastDown
 			Mouse.Released = not Mouse.Down and Mouse.LastDown
 
 		end
 
-		ImmediateState.Mouse.Down  = false
+		ImmediateState.Mouse.Down = false
 		ImmediateState.Mouse.Double = false
 		ImmediateState.Mouse.Clicked = false
 		ImmediateState.Mouse.Released = false
@@ -423,9 +423,9 @@ return function(FileBrowser)
 		for I = MOUSE_LAST, MOUSE_LEFT, -1 do
 			local Mouse = ImmediateState.Mouse[I]
 
-			if Mouse.Down     then ImmediateState.Mouse.Down     = true end
-			if Mouse.Double   then ImmediateState.Mouse.Double   = true end
-			if Mouse.Clicked  then ImmediateState.Mouse.Clicked  = I end
+			if Mouse.Down then ImmediateState.Mouse.Down = true end
+			if Mouse.Double then ImmediateState.Mouse.Double = true end
+			if Mouse.Clicked then ImmediateState.Mouse.Clicked = I end
 			if Mouse.Released then ImmediateState.Mouse.Released = I end
 		end
 
@@ -438,7 +438,7 @@ return function(FileBrowser)
 		ImmediateState.MouseY = MouseY
 		ImmediateState.DeltaY = MouseY - ImmediateState.LastMouseY
 
-		ImmediateState.ReleasedNode      = nil
+		ImmediateState.ReleasedNode = nil
 		ImmediateState.PanelHovered = self:IsHovered()
 
 		-- The starting and end indices into self.ExpandedNodeArray
@@ -448,21 +448,21 @@ return function(FileBrowser)
 		ImmediateState.TotalVisibleNodes = (ImmediateState.EndIndex - ImmediateState.StartIndex)
 		-- We test against this array subspan for mouse events
 		local BreakInputTesting = not CanInput -- if can't input, never even do input testing
-		local IsTree            = self.ViewType == VIEWTYPE_TREE and not self:IsSearching()
-		ImmediateState.Hovered           = false
+		local IsTree = self.ViewType == VIEWTYPE_TREE and not self:IsSearching()
+		ImmediateState.Hovered = false
 		ImmediateState.IsExpanderHovered = false
 		for AbsIndex = ImmediateState.StartIndex, ImmediateState.EndIndex do
 			local Node = self.ExpandedNodeArray[AbsIndex]
 
 			if not BreakInputTesting then
-				local X, Y, W, H  = self:GetIndexBounds(AbsIndex, ImmediateState.Scroll, ImmediateState.Width, Node.Depth)
+				local X, Y, W, H = self:GetIndexBounds(AbsIndex, ImmediateState.Scroll, ImmediateState.Width, Node.Depth)
 				local MouseInRect = ImmediateState:IsMouseInRect(X, Y, W, H) and ImmediateState.PanelHovered
 				if MouseInRect then
-					ImmediateState.Hovered           = Node
+					ImmediateState.Hovered = Node
 					ImmediateState.IsExpanderHovered = IsTree and Node:IsFolder() and ImmediateState:IsMouseInRect(GetExpanderBounds(Settings, X, Y, W, H))
 
 					if ImmediateState.Mouse.Clicked then
-						ImmediateState.Depressed           = Node
+						ImmediateState.Depressed = Node
 						ImmediateState.IsExpanderDepressed = ImmediateState.IsExpanderHovered
 					end
 
@@ -479,7 +479,7 @@ return function(FileBrowser)
 		ImmediateState.EmptyClicked = CanInput and ImmediateState.PanelHovered and not ImmediateState.Hovered and ImmediateState.Mouse.Clicked or nil
 
 		if ImmediateState.Mouse.Released or not ImmediateState.Mouse.Down then
-			ImmediateState.Depressed     = nil
+			ImmediateState.Depressed = nil
 			ImmediateState.IsExpanderDepressed = nil
 		end
 
@@ -493,12 +493,12 @@ return function(FileBrowser)
 		local ImmediateState = self.ImmediateState
 
 		-- Clicked for node logic, released for expander logic
-		local Clicked  = ImmediateState.Mouse.Clicked
+		local Clicked = ImmediateState.Mouse.Clicked
 		local Released = ImmediateState.Mouse.Released
 
 		if Clicked then
-			local Node               = ImmediateState.Depressed
-			local ExpanderDepressed  = ImmediateState.IsExpanderDepressed
+			local Node = ImmediateState.Depressed
+			local ExpanderDepressed = ImmediateState.IsExpanderDepressed
 
 			if Node and not ExpanderDepressed then
 				if Clicked == MOUSE_LEFT then
@@ -520,8 +520,8 @@ return function(FileBrowser)
 		end
 
 		if Released then
-			local Node               = ImmediateState.ReleasedNode
-			local ExpanderReleased   = ImmediateState.IsExpanderReleased
+			local Node = ImmediateState.ReleasedNode
+			local ExpanderReleased = ImmediateState.IsExpanderReleased
 
 			if Node and ExpanderReleased then
 				Node:ToggleExpanded()
@@ -561,21 +561,21 @@ return function(FileBrowser)
 	-- This function paints the current immediate state to the DPanel.
 	function BROWSERTREE:PaintCurrentState(PanelWidth, PanelHeight)
 		local Settings = self.Settings
-		local Skin           = self:GetSkin()
+		local Skin = self:GetSkin()
 
 		local ImmediateState = self.ImmediateState
-		local ScrollOffset   = ImmediateState.Scroll
-		local Width          = ImmediateState.Width
+		local ScrollOffset = ImmediateState.Scroll
+		local Width = ImmediateState.Width
 
-		local ViewType       = self.ViewType
-		local ContentWidth   = PanelWidth - (self.VBar:IsVisible() and self.VBar:GetWide() or 0)
+		local ViewType = self.ViewType
+		local ContentWidth = PanelWidth - (self.VBar:IsVisible() and self.VBar:GetWide() or 0)
 		local NameRight, TimeRight, SizeRight = GetListColumns(ContentWidth)
 
 		for AbsIndex = ImmediateState.StartIndex, ImmediateState.EndIndex do
 			local Node = self.ExpandedNodeArray[AbsIndex]
 			if Node then
-				local IsHovered      = ImmediateState.Hovered   == Node
-				local IsDepressed    = ImmediateState.Depressed == Node
+				local IsHovered = ImmediateState.Hovered == Node
+				local IsDepressed = ImmediateState.Depressed == Node
 				local NX, NY, NW, NH = self:GetIndexBounds(AbsIndex, ScrollOffset, Width, Node.Depth)
 
 				if ViewType == VIEWTYPE_TILES then
@@ -599,12 +599,12 @@ return function(FileBrowser)
 					draw.SimpleText(Node:GetTimeString(), Settings.NodeFont, TimeRight, TextY, TextColor, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
 					draw.SimpleText(Node:GetSizeString(), Settings.NodeFont, SizeRight, TextY, TextColor, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
 				else
-					local IsExpanderHovered   = IsHovered and ImmediateState.IsExpanderHovered
+					local IsExpanderHovered = IsHovered and ImmediateState.IsExpanderHovered
 					local IsExpanderDepressed = IsDepressed and ImmediateState.IsExpanderDepressed
 
-					local IX, IY, IW, IH      = GetIconBounds(Settings, NX, NY, NW, NH)
-					local EX, EY, EW, EH      = GetExpanderBounds(Settings, NX, NY, NW, NH, IsExpanderDepressed and -2 or IsExpanderHovered and 2 or 0)
-					local TextX, TextY        = GetTextPosition(Settings, NX, NY, NW, NH)
+					local IX, IY, IW, IH = GetIconBounds(Settings, NX, NY, NW, NH)
+					local EX, EY, EW, EH = GetExpanderBounds(Settings, NX, NY, NW, NH, IsExpanderDepressed and -2 or IsExpanderHovered and 2 or 0)
+					local TextX, TextY = GetTextPosition(Settings, NX, NY, NW, NH)
 
 					-- Paint background
 					local TextColor = self:PaintNodeBackground(Skin, Node, IsHovered, IsDepressed, NX, NY, NW, NH)

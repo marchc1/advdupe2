@@ -1,8 +1,8 @@
 return function(FileBrowser)
 	local UserInterfaceTimeFunc = FileBrowser.UserInterfaceTimeFunc
-	local DrawSkinPanel         = FileBrowser.DrawSkinPanel
-	local GetSkinTextColor      = FileBrowser.GetSkinTextColor
-	local GetStateTextColor     = FileBrowser.GetStateTextColor
+	local DrawSkinPanel = FileBrowser.DrawSkinPanel
+	local GetSkinTextColor = FileBrowser.GetSkinTextColor
+	local GetStateTextColor = FileBrowser.GetStateTextColor
 
 	local function ColorLabels(Panel, TextColor)
 		for _, Child in ipairs(Panel:GetChildren()) do
@@ -24,15 +24,15 @@ return function(FileBrowser)
 	-- This is a user prompt class, see Browser's UserPrompt stack methods
 
 	local USERPROMPT_MT = {}
-	local USERPROMPT    = setmetatable({}, USERPROMPT_MT)
+	local USERPROMPT = setmetatable({}, USERPROMPT_MT)
 
 	do
 		function USERPROMPT:Init(Browser)
 			local Settings = Browser.Settings
-			self.Browser  = Browser
+			self.Browser = Browser
 			self.Blocking = false
 
-			self.StartOpen  = UserInterfaceTimeFunc()
+			self.StartOpen = UserInterfaceTimeFunc()
 			self.WillOpenAt = self.StartOpen + Settings.PromptOpenTime
 
 			self.Panel = Browser:Add("DScrollPanel")
@@ -49,7 +49,7 @@ return function(FileBrowser)
 		function USERPROMPT_MT:__call(Browser)
 			if not IsValid(Browser) then return error ("Cannot create a headless node (we need a browser)") end
 
-			local Node   = setmetatable({}, {__index = USERPROMPT})
+			local Node = setmetatable({}, {__index = USERPROMPT})
 			Node:Init(Browser)
 
 			return Node
@@ -68,7 +68,7 @@ return function(FileBrowser)
 			self.Dock = Dock
 		end
 
-		-- Covers the whole browser, for things like the settings page
+		-- Covers the whole browser with no animation, for things like the settings page
 		function USERPROMPT:SetCover(Cover)
 			self.Cover = Cover and true or false
 		end
@@ -79,7 +79,9 @@ return function(FileBrowser)
 		end
 
 		function USERPROMPT:GetAnimationRatio(Now)
-			local OpenRatio  = Normalize(Now, self.StartOpen, self.WillOpenAt)
+			if self.Cover then return 1 end
+
+			local OpenRatio = Normalize(Now, self.StartOpen, self.WillOpenAt)
 			local CloseRatio = self.Closing and (1 - Normalize(Now, self.StartClose, self.WillCloseAt)) or 1
 
 			return math.min(OpenRatio, CloseRatio)
@@ -88,18 +90,18 @@ return function(FileBrowser)
 		local DockPadding = 4
 
 		function USERPROMPT:DoThink()
-			local Now       = UserInterfaceTimeFunc()
-			local Closing   = self.Closing
+			local Now = UserInterfaceTimeFunc()
+			local Closing = self.Closing
 
-			if Closing and Now >= self.WillCloseAt then
+			if Closing and (self.Cover or Now >= self.WillCloseAt) then
 				return false
 			end
 
-			local Ratio                     = self:GetAnimationRatio(Now)
-			local Browser                   = self.Browser
+			local Ratio = self:GetAnimationRatio(Now)
+			local Browser = self.Browser
 			local ParentWidth, ParentHeight = Browser:GetWide(), Browser:GetTall()
 
-			local PosX,  PosY
+			local PosX, PosY
 			local SizeW, SizeH
 
 			local ContentWide, ContentTall = self.Panel:ChildrenSize()
@@ -112,7 +114,7 @@ return function(FileBrowser)
 			elseif Dock == TOP or Dock == BOTTOM then
 				SizeW = ParentWidth - (DockPadding * 2)
 				SizeH = math.ceil(ContentTall)
-				PosX  = DockPadding
+				PosX = DockPadding
 
 				local Slide = math.ceil((1 - Ratio) * (SizeH + DockPadding))
 				if Dock == TOP then
@@ -123,8 +125,8 @@ return function(FileBrowser)
 			elseif Dock == FILL then
 				SizeW = math.ceil(ContentWide - (DockPadding * 2))
 				SizeH = math.ceil(ContentTall)
-				PosX  = math.floor((ParentWidth / 2) - (SizeW / 2))
-				PosY  = math.floor((ParentHeight / 2) - (SizeH / 2) - (DockPadding / 2))
+				PosX = math.floor((ParentWidth / 2) - (SizeW / 2))
+				PosY = math.floor((ParentHeight / 2) - (SizeH / 2) - (DockPadding / 2))
 			end
 
 			self.Panel:SetPos(PosX, PosY)
@@ -140,13 +142,13 @@ return function(FileBrowser)
 			local Settings = self.Browser.Settings
 			if self.OnClose and not self.Closing then self:OnClose() end
 
-			self.Blocking    = false
-			self.Closing     = true
-			self.StartClose  = UserInterfaceTimeFunc()
+			self.Blocking = false
+			self.Closing = true
+			self.StartClose = UserInterfaceTimeFunc()
 			self.WillCloseAt = self.StartClose + Settings.PromptCloseTime
 		end
 	end
 
-	FileBrowser.USERPROMPT      = USERPROMPT
+	FileBrowser.USERPROMPT = USERPROMPT
 	FileBrowser.PaintUserPrompt = PaintUserPrompt
 end

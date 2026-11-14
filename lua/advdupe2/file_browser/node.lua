@@ -1,20 +1,20 @@
 return function(FileBrowser)
 	local NODETYPE_FOLDER = FileBrowser.NODETYPE_FOLDER
-	local NODETYPE_FILE   = FileBrowser.NODETYPE_FILE
+	local NODETYPE_FILE = FileBrowser.NODETYPE_FILE
 
 	local NODE_MT = {}
-	local NODE    = setmetatable({}, NODE_MT)
+	local NODE = setmetatable({}, NODE_MT)
 	do
 		local LoadDataFolderInternal
 
 		function NODE:Init(Type, Browser)
-			self.Type      = Type
-			self.Browser   = Browser
-			self.Files     = {}
-			self.Folders   = {}
-			self.Sorted    = {}
-			self.Expanded  = false
-			self.Selected  = false
+			self.Type = Type
+			self.Browser = Browser
+			self.Files = {}
+			self.Folders = {}
+			self.Sorted = {}
+			self.Expanded = false
+			self.Selected = false
 
 			self:MarkSortDirty()
 		end
@@ -23,15 +23,15 @@ return function(FileBrowser)
 			if Type == nil then return error("Cannot create typeless node") end
 			if not IsValid(Browser) then return error ("Cannot create a headless node (we need a browser)") end
 
-			local Node   = setmetatable({}, {__index = NODE})
+			local Node = setmetatable({}, {__index = NODE})
 			Node:Init(Type, Browser)
 
 			return Node
 		end
 
-		function NODE:IsRoot()   return (self.Root or error("No root?")) == self end
-		function NODE:IsFolder() return self.Type == NODETYPE_FOLDER    end
-		function NODE:IsFile()   return self.Type == NODETYPE_FILE      end
+		function NODE:IsRoot() return (self.Root or error("No root?")) == self end
+		function NODE:IsFolder() return self.Type == NODETYPE_FOLDER end
+		function NODE:IsFile() return self.Type == NODETYPE_FILE end
 
 		function NODE:GetTime()
 			if not self.Path then return 0 end
@@ -93,7 +93,7 @@ return function(FileBrowser)
 		function NODE:Count() return #self.Files + #self.Folders end
 
 		function NODE:MarkSortDirty()
-			self.SortDirty         = true
+			self.SortDirty = true
 			self.Browser:MarkSortDirty()
 		end
 
@@ -131,8 +131,8 @@ return function(FileBrowser)
 			self:MarkSortDirty()
 		end
 
-		function NODE:Expand()         self:SetExpanded(true)              end
-		function NODE:Collapse()       self:SetExpanded(false)             end
+		function NODE:Expand() self:SetExpanded(true) end
+		function NODE:Collapse() self:SetExpanded(false) end
 		function NODE:ToggleExpanded() self:SetExpanded(not self.Expanded) end
 
 		function NODE:ExpandRecursive()
@@ -146,12 +146,12 @@ return function(FileBrowser)
 		end
 
 		function NODE:SetDataPath(Path)
-			local Name   = string.GetFileFromFilename(Path)
-			self.Path    = Path
-			self.Text    = self:IsFile() and string.StripExtension(Name) or Name
-			self.Time    = nil
+			local Name = string.GetFileFromFilename(Path)
+			self.Path = Path
+			self.Text = self:IsFile() and string.StripExtension(Name) or Name
+			self.Time = nil
 			self.TimeStr = nil
-			self.Size    = nil
+			self.Size = nil
 			self.SizeStr = nil
 		end
 
@@ -209,12 +209,12 @@ return function(FileBrowser)
 		function NODE:PerformResort(SortFunction)
 			if not self.SortDirty then return end
 
-			local Sorted   = self.Sorted
-			local Files    = self.Files
-			local Folders  = self.Folders
+			local Sorted = self.Sorted
+			local Files = self.Files
+			local Folders = self.Folders
 			table.Empty(Sorted)
 
-			for I = 1, #Files   do Sorted[#Sorted + 1] = Files[I]   end
+			for I = 1, #Files do Sorted[#Sorted + 1] = Files[I] end
 			for I = 1, #Folders do Sorted[#Sorted + 1] = Folders[I] end
 
 			-- For each node, check FirstObserved and call if it exists

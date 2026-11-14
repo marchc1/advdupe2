@@ -857,7 +857,12 @@ if(SERVER) then
 			file.CreateDir("advdupe2/maps/" .. map)
 
 			local savename = AdvDupe2.SanitizeFilename(args[1] and #args[1] > 0 and args[1] or util.DateStamp())
-			file.Write("advdupe2/maps/" .. map .. "/" .. savename .. ".txt", data)
+			local path = "advdupe2/maps/" .. map .. "/" .. savename .. ".txt"
+			file.Write(path, data)
+
+			net.Start("AdvDupe2_MapSaved")
+				net.WriteString(path)
+			net.Send(ply)
 
 			AdvDupe2.Notify(ply, "Map save, saved successfully.")
 		end)
@@ -1069,14 +1074,14 @@ if(CLIENT) then
 	CreateClientConVar("advdupe2_paste_protectoveride", 1, false, true)
 	CreateClientConVar("advdupe2_debug_openfile", 1, false, true)
 
-	local RadioColors   = setmetatable({}, {__mode = "k"})
-	local PendingSkins  = {}
-	local CirclePolys   = {}
+	local RadioColors = setmetatable({}, {__mode = "k"})
+	local PendingSkins = {}
+	local CirclePolys = {}
 	local RadioSampleSize = 32
 	local RadioSampleTarget
 
 	local function GetCirclePoly(X, Y, Radius)
-		local Key  = X .. ":" .. Y .. ":" .. Radius
+		local Key = X .. ":" .. Y .. ":" .. Radius
 		local Poly = CirclePolys[Key]
 		if Poly then return Poly end
 
@@ -1093,7 +1098,7 @@ if(CLIENT) then
 
 	local function CaptureCheckBox(Skin, Checked)
 		local Proxy = {
-			GetChecked  = function() return Checked end,
+			GetChecked = function() return Checked end,
 			GetDisabled = function() return false end,
 		}
 
@@ -1116,7 +1121,7 @@ if(CLIENT) then
 
 		CaptureCheckBox(Skin, false)
 		local Border = ReadColor(1, Half)
-		local Fill   = ReadColor(Half, Half)
+		local Fill = ReadColor(Half, Half)
 		render.PopRenderTarget()
 
 		CaptureCheckBox(Skin, true)
@@ -1162,9 +1167,9 @@ if(CLIENT) then
 			return Skin:PaintCheckBox(self, w, h)
 		end
 
-		local Alpha  = self:GetDisabled() and 120 or 255
+		local Alpha = self:GetDisabled() and 120 or 255
 		local Radius = math.floor(math.min(w, h) / 2)
-		local X, Y   = w / 2, h / 2
+		local X, Y = w / 2, h / 2
 
 		draw.NoTexture()
 		surface.SetDrawColor(Colors.Border.r, Colors.Border.g, Colors.Border.b, Alpha)

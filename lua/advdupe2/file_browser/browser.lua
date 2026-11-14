@@ -1,13 +1,13 @@
 return function(FileBrowser)
-	local VIEWTYPE_TREE         = FileBrowser.VIEWTYPE_TREE
-	local SORTTYPE_NAME         = FileBrowser.SORTTYPE_NAME
+	local VIEWTYPE_TREE = FileBrowser.VIEWTYPE_TREE
+	local SORTTYPE_NAME = FileBrowser.SORTTYPE_NAME
 	local UserInterfaceTimeFunc = FileBrowser.UserInterfaceTimeFunc
-	local IRootFolder           = FileBrowser.IRootFolder
-	local USERPROMPT            = FileBrowser.USERPROMPT
-	local IsAttached            = FileBrowser.IsAttached
-	local GetSkinTextColor      = FileBrowser.GetSkinTextColor
-	local DrawSkinPanel         = FileBrowser.DrawSkinPanel
-	local PaintUserPrompt       = FileBrowser.PaintUserPrompt
+	local IRootFolder = FileBrowser.IRootFolder
+	local USERPROMPT = FileBrowser.USERPROMPT
+	local IsAttached = FileBrowser.IsAttached
+	local GetSkinTextColor = FileBrowser.GetSkinTextColor
+	local DrawSkinPanel = FileBrowser.DrawSkinPanel
+	local PaintUserPrompt = FileBrowser.PaintUserPrompt
 
 	local BROWSER = {}
 	Derma_Hook(BROWSER, "PerformLayout", "Layout", "Panel")
@@ -34,7 +34,7 @@ return function(FileBrowser)
 	end
 
 	function BROWSER:Setup(Settings)
-		self.Settings          = Settings or error("No settings provided")
+		self.Settings = Settings or error("No settings provided")
 		self.TreeView.Settings = Settings
 
 		self:SetViewType(Settings:GetViewType())
@@ -48,7 +48,7 @@ return function(FileBrowser)
 		local Settings = self.Settings
 		ViewType = ViewType or error("No viewtype provided")
 
-		local Tree     = self.TreeView
+		local Tree = self.TreeView
 		local Previous = Tree.ViewType
 		if Previous == ViewType then return end
 
@@ -138,12 +138,12 @@ return function(FileBrowser)
 		end
 	end
 
-	function BROWSER:CanNavigateBack()    return #self.TreeView.BackHistory > 0    end
+	function BROWSER:CanNavigateBack() return #self.TreeView.BackHistory > 0 end
 	function BROWSER:CanNavigateForward() return #self.TreeView.ForwardHistory > 0 end
-	function BROWSER:CanNavigateUp()      return self.TreeView.CurrentFolder ~= self.TreeView end
+	function BROWSER:CanNavigateUp() return self.TreeView.CurrentFolder ~= self.TreeView end
 
 	function BROWSER:NavigateBack()
-		local Tree   = self.TreeView
+		local Tree = self.TreeView
 		local Folder = PopAttached(Tree, Tree.BackHistory)
 		if not Folder then return end
 
@@ -152,7 +152,7 @@ return function(FileBrowser)
 	end
 
 	function BROWSER:NavigateForward()
-		local Tree   = self.TreeView
+		local Tree = self.TreeView
 		local Folder = PopAttached(Tree, Tree.ForwardHistory)
 		if not Folder then return end
 
@@ -168,7 +168,7 @@ return function(FileBrowser)
 	end
 
 	function BROWSER:KeepSelectedInPlace(Change)
-		local Tree     = self.TreeView
+		local Tree = self.TreeView
 		local Selected = Tree:GetSelectedItem()
 		if not Selected then return Change() end
 
@@ -226,7 +226,7 @@ return function(FileBrowser)
 		RootFolderType = IRootFolder(RootFolderType or error("RootFolderType must contain a IRootFolder implementation")) -- This checks if the type implemented the interface
 		local RealNode = self.TreeView:AddFolder(RootFolderType:GetFolderName())
 
-		RealNode.Root     = RealNode
+		RealNode.Root = RealNode
 		RealNode.RootImpl = RootFolderType
 
 		RootFolderType:Init(self, RealNode)
@@ -240,15 +240,15 @@ return function(FileBrowser)
 
 	local NotifIcons = {
 		[NOTIFY_CLEANUP] = "bin",
-		[NOTIFY_ERROR]   = "error",
+		[NOTIFY_ERROR] = "error",
 		[NOTIFY_GENERIC] = "information",
-		[NOTIFY_HINT]    = "lightbulb",
-		[NOTIFY_UNDO]    = "arrow_undo",
+		[NOTIFY_HINT] = "lightbulb",
+		[NOTIFY_UNDO] = "arrow_undo",
 	}
 
 	function BROWSER:Notify(Message, Level, Time)
 		Level = Level or NOTIFY_GENERIC
-		Time  = Time or 5
+		Time = Time or 5
 
 		print("[" .. self.Settings.Prefix .. "] " .. tostring(Message))
 
@@ -302,9 +302,9 @@ return function(FileBrowser)
 	local function SetupNameEntry(Entry, NameFilter)
 		UseSkinPlaceholderColor(Entry)
 
-		local MenuKey      = string.lower(input.LookupBinding("menu") or "q")
+		local MenuKey = string.lower(input.LookupBinding("menu") or "q")
 		local PreviousText = Entry:GetText()
-		local FirstChange  = true
+		local FirstChange = true
 
 		function Entry:OnChange()
 			local Text = self:GetText()
@@ -543,7 +543,7 @@ return function(FileBrowser)
 
 		local NamePlaceholder = self:GetPlaceholderText(Node, "SaveName", "File name")
 		local DescPlaceholder = self:GetPlaceholderText(Node, "SaveDescription", "Description")
-		local NameFilter      = self:GetRootImpl(Node):GetNameFilter()
+		local NameFilter = self:GetRootImpl(Node):GetNameFilter()
 
 		SharedFileFolderLogic(self, Node, true, NamePlaceholder, DescPlaceholder, "disk", function(_, RootImpl, _, FileName, Desc)
 			RootImpl:UserSave(self, Node, FileName, Desc)
@@ -618,9 +618,9 @@ return function(FileBrowser)
 		Prompt.Panel:DockPadding(4,4,4,4)
 		self.SearchPrompt = Prompt
 
-		local Row    = CreatePromptRow(Prompt)
+		local Row = CreatePromptRow(Prompt)
 		local Cancel = CreatePromptButton(Row, "cancel")
-		local Find   = CreatePromptButton(Row, "magnifier", 24)
+		local Find = CreatePromptButton(Row, "magnifier", 24)
 			Find:SetTooltip("Search Files")
 
 		local Search = Row:Add("DTextEntry")
@@ -666,7 +666,7 @@ return function(FileBrowser)
 		if not Node:IsFolder() then ErrorNoHaltWithStack(self.Settings.Prefix .. ": Attempted to call StartFolder on a non-folder. Operation canceled.") return false end
 
 		local NamePlaceholder = self:GetPlaceholderText(Node, "FolderName", "Folder name")
-		local NameFilter      = self:GetRootImpl(Node):GetNameFilter()
+		local NameFilter = self:GetRootImpl(Node):GetNameFilter()
 
 		SharedFileFolderLogic(self, Node, false, NamePlaceholder, nil, "folder_add", function(_, RootImpl, _, FileName)
 			local Success, Reason = RootImpl:UserMakeFolder(self, Node, FileName)
@@ -863,7 +863,7 @@ return function(FileBrowser)
 	end
 
 	function BROWSER:PushUserPrompt()
-		local UserPrompts  = self:GetUserPromptStack()
+		local UserPrompts = self:GetUserPromptStack()
 		local StackPointer = self:IncrementUserPromptStackPtr()
 		local Prompt = USERPROMPT(self)
 		UserPrompts[StackPointer] = Prompt
@@ -871,9 +871,9 @@ return function(FileBrowser)
 	end
 
 	function BROWSER:PopUserPrompt()
-		local UserPrompts  = self:GetUserPromptStack()
+		local UserPrompts = self:GetUserPromptStack()
 		local StackPointer = self:DecrementUserPromptStackPtr()
-		local Prompt       = UserPrompts[StackPointer]
+		local Prompt = UserPrompts[StackPointer]
 		UserPrompts[StackPointer] = nil
 		return Prompt
 	end
@@ -891,9 +891,9 @@ return function(FileBrowser)
 		end
 	end
 
-	local WORLD  = Material("icon16/world.png")
+	local WORLD = Material("icon16/world.png")
 	local FOLDER = Material("icon16/folder.png")
-	local PAGE   = Material("icon16/page.png", "smooth")
+	local PAGE = Material("icon16/page.png", "smooth")
 
 	function BROWSER:ShowSavePrompt()
 		if self.BrowserWait then return end
@@ -924,9 +924,9 @@ return function(FileBrowser)
 			local Size = math.ease.OutQuad(SinTime) * 32
 
 			surface.SetDrawColor(255, 255, 255, 255)
-			surface.SetMaterial(WORLD)  surface.DrawTexturedRectRotated(24, h / 2, 32, 32, 0)
+			surface.SetMaterial(WORLD) surface.DrawTexturedRectRotated(24, h / 2, 32, 32, 0)
 			surface.SetMaterial(FOLDER) surface.DrawTexturedRectRotated(w - 24, h / 2, 32, 32, 0)
-			surface.SetMaterial(PAGE)   surface.DrawTexturedRectRotated(math.Remap(Time, 0, 1, 24, w - 24), math.Remap(SinTime, 0, 1, h / 2, h / 3), Size, Size, 0)
+			surface.SetMaterial(PAGE) surface.DrawTexturedRectRotated(math.Remap(Time, 0, 1, 24, w - 24), math.Remap(SinTime, 0, 1, h / 2, h / 3), Size, Size, 0)
 		end
 	end
 
@@ -941,14 +941,14 @@ return function(FileBrowser)
 	-- This stuff is kinda weird, but doesnt run that much and seems to be pretty OK. Real docking seems to cause
 	-- layout issues that I would rather not deal with, especially during animation.
 	function BROWSER:ThinkAboutUserPrompts()
-		local StackDocks     = self.StackDocks or {}
+		local StackDocks = self.StackDocks or {}
 		StackDocks[TOP] = 0
 		StackDocks[LEFT] = 0
 		StackDocks[RIGHT] = 0
 		StackDocks[BOTTOM] = 0
 
-		local UserPrompts    = self:GetUserPromptStack()
-		local Blocking       = false
+		local UserPrompts = self:GetUserPromptStack()
+		local Blocking = false
 
 		local LastBlockingPanel = false
 

@@ -1,17 +1,17 @@
 return function(FileBrowser)
-	local VIEWTYPE_TREE  = FileBrowser.VIEWTYPE_TREE
-	local VIEWTYPE_LIST  = FileBrowser.VIEWTYPE_LIST
+	local VIEWTYPE_TREE = FileBrowser.VIEWTYPE_TREE
+	local VIEWTYPE_LIST = FileBrowser.VIEWTYPE_LIST
 	local VIEWTYPE_TILES = FileBrowser.VIEWTYPE_TILES
-	local SORTTYPE_NAME  = FileBrowser.SORTTYPE_NAME
-	local SORTTYPE_TIME  = FileBrowser.SORTTYPE_TIME
-	local SORTTYPE_SIZE  = FileBrowser.SORTTYPE_SIZE
+	local SORTTYPE_NAME = FileBrowser.SORTTYPE_NAME
+	local SORTTYPE_TIME = FileBrowser.SORTTYPE_TIME
+	local SORTTYPE_SIZE = FileBrowser.SORTTYPE_SIZE
 	local ListHeaderTall = FileBrowser.ListHeaderTall
-	local NavBarTall     = FileBrowser.NavBarTall
+	local NavBarTall = FileBrowser.NavBarTall
 	local GetListColumns = FileBrowser.GetListColumns
-	local GetListTextX   = FileBrowser.GetListTextX
+	local GetListTextX = FileBrowser.GetListTextX
 	local GetSkinTextColor = FileBrowser.GetSkinTextColor
-	local DrawSkinPanel    = FileBrowser.DrawSkinPanel
-	local DrawSkinState    = FileBrowser.DrawSkinState
+	local DrawSkinPanel = FileBrowser.DrawSkinPanel
+	local DrawSkinState = FileBrowser.DrawSkinState
 	local GetStateTextColor = FileBrowser.GetStateTextColor
 
 	local PANEL = {}
@@ -25,7 +25,7 @@ return function(FileBrowser)
 		if not self.Browser then return end
 
 		local ViewType = self.Browser:GetViewType()
-		local Top      = 24
+		local Top = 24
 
 		local ShowNavBar = ViewType ~= VIEWTYPE_TREE
 		self.NavBar:SetVisible(ShowNavBar)
@@ -66,7 +66,7 @@ return function(FileBrowser)
 	end
 
 	local function UpdateClientFiles(Browser)
-		local Tree     = Browser.TreeView
+		local Tree = Browser.TreeView
 		local OpenPath = Tree.CurrentFolder ~= Tree and Tree.CurrentFolder.Path or nil
 
 		Browser:EndSearch()
@@ -135,13 +135,13 @@ return function(FileBrowser)
 	local COLOR_SELECTED = color_white
 	local COLOR_UNSELECTED = Color(143, 143, 143, 143)
 
-	local ICON_SORT_UP   = Material("icon16/bullet_arrow_up.png")
+	local ICON_SORT_UP = Material("icon16/bullet_arrow_up.png")
 	local ICON_SORT_DOWN = Material("icon16/bullet_arrow_down.png")
 
 	function PANEL:CreateNavBar()
 		local Settings = self.Settings
 		local Browser = self.Browser
-		local Tree    = Browser.TreeView
+		local Tree = Browser.TreeView
 
 		local Bar = self:Add("Panel")
 		self.NavBar = Bar
@@ -159,13 +159,13 @@ return function(FileBrowser)
 		end
 
 		Bar.Buttons = {
-			AddNavButton("arrow_left",  "Back",    function() Browser:NavigateBack()    end, function() return Browser:CanNavigateBack()    end),
+			AddNavButton("arrow_left", "Back", function() Browser:NavigateBack() end, function() return Browser:CanNavigateBack() end),
 			AddNavButton("arrow_right", "Forward", function() Browser:NavigateForward() end, function() return Browser:CanNavigateForward() end),
-			AddNavButton("arrow_up",    "Up",      function() Browser:NavigateUp()      end, function() return Browser:CanNavigateUp()      end),
+			AddNavButton("arrow_up", "Up", function() Browser:NavigateUp() end, function() return Browser:CanNavigateUp() end),
 		}
 
 		local Path = Bar:Add("Panel")
-		Bar.Path   = Path
+		Bar.Path = Path
 		Path.Items = {}
 
 		function Path:Paint(w, h)
@@ -223,8 +223,8 @@ return function(FileBrowser)
 				Segment:SetMouseInputEnabled(true)
 			end
 
-			Segment.Node    = Node
-			Segment.Paint   = PaintSegment
+			Segment.Node = Node
+			Segment.Paint = PaintSegment
 			Segment.DoClick = function() Browser:NavigateTo(Node) end
 			Path.Items[#Path.Items + 1] = Segment
 		end
@@ -234,7 +234,7 @@ return function(FileBrowser)
 			table.Empty(self.Items)
 
 			local Chain = {}
-			local Node  = Current
+			local Node = Current
 			while Node and Node ~= Tree do
 				table.insert(Chain, 1, Node)
 				Node = Node.ParentNode
@@ -269,7 +269,7 @@ return function(FileBrowser)
 				First = #Items + 1
 				while First > 2 and Used + Items[First - 1]:GetWide() <= w do
 					First = First - 1
-					Used  = Used + Items[First]:GetWide()
+					Used = Used + Items[First]:GetWide()
 				end
 			end
 
@@ -311,25 +311,25 @@ return function(FileBrowser)
 	function PANEL:CreateListHeader()
 		local Settings = self.Settings
 		local Browser = self.Browser
-		local Tree    = Browser.TreeView
+		local Tree = Browser.TreeView
 
 		local Header = self:Add("Panel")
 		Header:SetMouseInputEnabled(true)
 		self.ListHeader = Header
 
 		local Columns = {
-			{Text = "Name",     SortType = SORTTYPE_NAME, Align = TEXT_ALIGN_LEFT},
+			{Text = "Name", SortType = SORTTYPE_NAME, Align = TEXT_ALIGN_LEFT},
 			{Text = "Modified", SortType = SORTTYPE_TIME, Align = TEXT_ALIGN_RIGHT},
-			{Text = "Size",     SortType = SORTTYPE_SIZE, Align = TEXT_ALIGN_RIGHT},
+			{Text = "Size", SortType = SORTTYPE_SIZE, Align = TEXT_ALIGN_RIGHT},
 		}
 
 		local function UpdateColumnBounds()
 			local Width = Header:GetWide() - (Tree.VBar:IsVisible() and Tree.VBar:GetWide() or 0)
 			local NameRight, TimeRight, SizeRight = GetListColumns(Width)
 
-			Columns[1].Left, Columns[1].Right, Columns[1].TextX = 0,         NameRight, GetListTextX(Settings)
+			Columns[1].Left, Columns[1].Right, Columns[1].TextX = 0, NameRight, GetListTextX(Settings)
 			Columns[2].Left, Columns[2].Right, Columns[2].TextX = NameRight, TimeRight, TimeRight
-			Columns[3].Left, Columns[3].Right, Columns[3].TextX = TimeRight, Width,     SizeRight
+			Columns[3].Left, Columns[3].Right, Columns[3].TextX = TimeRight, Width, SizeRight
 		end
 
 		local function GetHoveredColumn()
@@ -358,7 +358,7 @@ return function(FileBrowser)
 
 				if Tree.SortType == Column.SortType then
 					local TextWidth = surface.GetTextSize(Column.Text)
-					local ArrowX    = Column.Align == TEXT_ALIGN_LEFT and (Column.TextX + TextWidth + 2) or (Column.TextX - TextWidth - 18)
+					local ArrowX = Column.Align == TEXT_ALIGN_LEFT and (Column.TextX + TextWidth + 2) or (Column.TextX - TextWidth - 18)
 
 					surface.SetDrawColor(255, 255, 255, 255)
 					surface.SetMaterial(Tree.Ascending and ICON_SORT_UP or ICON_SORT_DOWN)
@@ -409,33 +409,33 @@ return function(FileBrowser)
 		self:CreateListHeader()
 		UpdateClientFiles(self.Browser)
 
-		self.SearchAll     = self:AddLeftsideButton("folder_magnify", "Search all root folders", function()
+		self.SearchAll = self:AddLeftsideButton("folder_magnify", "Search all root folders", function()
 			self.Browser:StartSearch(self.Browser.TreeView)
 		end)
 		self.SearchAll.OffsetY = -1 -- the icon sits low
 		do
 			self:AddLeftsideDivider()
-			self.SwitchToTree  = self:AddLeftsideButton("application_side_tree", "Tree view", function() self.Browser:SetViewType(VIEWTYPE_TREE) end)
-			self.SwitchToList  = self:AddLeftsideButton("application_view_detail", "List view", function() self.Browser:SetViewType(VIEWTYPE_LIST) end)
+			self.SwitchToTree = self:AddLeftsideButton("application_side_tree", "Tree view", function() self.Browser:SetViewType(VIEWTYPE_TREE) end)
+			self.SwitchToList = self:AddLeftsideButton("application_view_detail", "List view", function() self.Browser:SetViewType(VIEWTYPE_LIST) end)
 			self.SwitchToTiles = self:AddLeftsideButton("application_view_tile", "Tile view", function() self.Browser:SetViewType(VIEWTYPE_TILES) end)
 
-			self.SwitchToTree.Think  = function(b) b.m_Image:SetImageColor(self.Browser:GetViewType() == VIEWTYPE_TREE and COLOR_SELECTED or COLOR_UNSELECTED) end
-			self.SwitchToList.Think  = function(b) b.m_Image:SetImageColor(self.Browser:GetViewType() == VIEWTYPE_LIST and COLOR_SELECTED or COLOR_UNSELECTED) end
+			self.SwitchToTree.Think = function(b) b.m_Image:SetImageColor(self.Browser:GetViewType() == VIEWTYPE_TREE and COLOR_SELECTED or COLOR_UNSELECTED) end
+			self.SwitchToList.Think = function(b) b.m_Image:SetImageColor(self.Browser:GetViewType() == VIEWTYPE_LIST and COLOR_SELECTED or COLOR_UNSELECTED) end
 			self.SwitchToTiles.Think = function(b) b.m_Image:SetImageColor(self.Browser:GetViewType() == VIEWTYPE_TILES and COLOR_SELECTED or COLOR_UNSELECTED) end
 		end
 		do
 			self:AddLeftsideDivider()
-			self.SwitchToName  = self:AddLeftsideButton("text_replace", "Sort by Name", function() self.Browser:SetSortType(SORTTYPE_NAME) end)
-			self.SwitchToTime  = self:AddLeftsideButton("time", "Sort by Time", function() self.Browser:SetSortType(SORTTYPE_TIME) end)
+			self.SwitchToName = self:AddLeftsideButton("text_replace", "Sort by Name", function() self.Browser:SetSortType(SORTTYPE_NAME) end)
+			self.SwitchToTime = self:AddLeftsideButton("time", "Sort by Time", function() self.Browser:SetSortType(SORTTYPE_TIME) end)
 
-			self.SwitchAscending  = self:AddLeftsideButton("arrow_up", "Sort Ascending", function() self.Browser:SetAscending(true) end)
-			self.SwitchDescending  = self:AddLeftsideButton("arrow_down", "Sort Descending", function() self.Browser:SetAscending(false) end)
+			self.SwitchAscending = self:AddLeftsideButton("arrow_up", "Sort Ascending", function() self.Browser:SetAscending(true) end)
+			self.SwitchDescending = self:AddLeftsideButton("arrow_down", "Sort Descending", function() self.Browser:SetAscending(false) end)
 
-			self.SwitchAscending.Think  = function(b) b.m_Image:SetImageColor(self.Browser.TreeView.Ascending and COLOR_SELECTED or COLOR_UNSELECTED) end
-			self.SwitchDescending.Think  = function(b) b.m_Image:SetImageColor(not self.Browser.TreeView.Ascending and COLOR_SELECTED or COLOR_UNSELECTED) end
+			self.SwitchAscending.Think = function(b) b.m_Image:SetImageColor(self.Browser.TreeView.Ascending and COLOR_SELECTED or COLOR_UNSELECTED) end
+			self.SwitchDescending.Think = function(b) b.m_Image:SetImageColor(not self.Browser.TreeView.Ascending and COLOR_SELECTED or COLOR_UNSELECTED) end
 
-			self.SwitchToName.Think  = function(b) b.m_Image:SetImageColor(self.Browser.TreeView.SortType == SORTTYPE_NAME and COLOR_SELECTED or COLOR_UNSELECTED) end
-			self.SwitchToTime.Think  = function(b) b.m_Image:SetImageColor(self.Browser.TreeView.SortType == SORTTYPE_TIME and COLOR_SELECTED or COLOR_UNSELECTED) end
+			self.SwitchToName.Think = function(b) b.m_Image:SetImageColor(self.Browser.TreeView.SortType == SORTTYPE_NAME and COLOR_SELECTED or COLOR_UNSELECTED) end
+			self.SwitchToTime.Think = function(b) b.m_Image:SetImageColor(self.Browser.TreeView.SortType == SORTTYPE_TIME and COLOR_SELECTED or COLOR_UNSELECTED) end
 		end
 		self.Refresh = self:AddRightsideButton("arrow_refresh", "Refresh Files", function(button)
 			self.Browser:ClearAllUserPrompts()

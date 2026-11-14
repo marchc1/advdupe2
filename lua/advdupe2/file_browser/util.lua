@@ -1,18 +1,18 @@
 return function(FileBrowser)
 	-- Enums
 	-- These are internal really, so i don't think these need to be exposed?
-	local NODETYPE_FOLDER          = 1
-	local NODETYPE_FILE            = 2
+	local NODETYPE_FOLDER = 1
+	local NODETYPE_FILE = 2
 	-- I may implement more of these later, just defining them now
-	local VIEWTYPE_TREE  = 0
-	local VIEWTYPE_LIST  = 1
+	local VIEWTYPE_TREE = 0
+	local VIEWTYPE_LIST = 1
 	local VIEWTYPE_TILES = 2
 
 	local SORTTYPE_NAME = 0
 	local SORTTYPE_TIME = 1
 	local SORTTYPE_SIZE = 2
 
-	local UserInterfaceTimeFunc  =   RealTime
+	local UserInterfaceTimeFunc = RealTime
 
 	local function GetNodeBounds(Settings, ScrollOffset, AbsIndex, Width, Depth)
 		return
@@ -41,7 +41,7 @@ return function(FileBrowser)
 	end
 
 	local ListTimeWidth, ListSizeWidth = 116, 72
-	local ListHeaderTall, NavBarTall   = 20, 24
+	local ListHeaderTall, NavBarTall = 20, 24
 
 	local function GetListColumns(Width)
 		local SizeRight = Width - 6
@@ -56,7 +56,7 @@ return function(FileBrowser)
 
 	local TruncatedText, TruncatedCount = {}, 0
 	local function TruncateText(Text, Font, MaxWidth)
-		local Key    = Font .. "\0" .. math.floor(MaxWidth) .. "\0" .. Text
+		local Key = Font .. "\0" .. math.floor(MaxWidth) .. "\0" .. Text
 		local Cached = TruncatedText[Key]
 		if Cached then return Cached end
 
@@ -204,25 +204,25 @@ return function(FileBrowser)
 		end
 	end
 
-	FileBrowser.NODETYPE_FOLDER       = NODETYPE_FOLDER
-	FileBrowser.NODETYPE_FILE         = NODETYPE_FILE
-	FileBrowser.VIEWTYPE_TREE         = VIEWTYPE_TREE
-	FileBrowser.VIEWTYPE_LIST         = VIEWTYPE_LIST
-	FileBrowser.VIEWTYPE_TILES        = VIEWTYPE_TILES
-	FileBrowser.SORTTYPE_NAME         = SORTTYPE_NAME
-	FileBrowser.SORTTYPE_TIME         = SORTTYPE_TIME
-	FileBrowser.SORTTYPE_SIZE         = SORTTYPE_SIZE
+	FileBrowser.NODETYPE_FOLDER = NODETYPE_FOLDER
+	FileBrowser.NODETYPE_FILE = NODETYPE_FILE
+	FileBrowser.VIEWTYPE_TREE = VIEWTYPE_TREE
+	FileBrowser.VIEWTYPE_LIST = VIEWTYPE_LIST
+	FileBrowser.VIEWTYPE_TILES = VIEWTYPE_TILES
+	FileBrowser.SORTTYPE_NAME = SORTTYPE_NAME
+	FileBrowser.SORTTYPE_TIME = SORTTYPE_TIME
+	FileBrowser.SORTTYPE_SIZE = SORTTYPE_SIZE
 	FileBrowser.UserInterfaceTimeFunc = UserInterfaceTimeFunc
-	FileBrowser.GetNodeBounds         = GetNodeBounds
-	FileBrowser.GetExpanderBounds     = GetExpanderBounds
-	FileBrowser.GetIconBounds         = GetIconBounds
-	FileBrowser.GetTextPosition       = GetTextPosition
-	FileBrowser.ListTimeWidth         = ListTimeWidth
-	FileBrowser.ListSizeWidth         = ListSizeWidth
-	FileBrowser.ListHeaderTall        = ListHeaderTall
-	FileBrowser.NavBarTall            = NavBarTall
-	FileBrowser.GetListColumns        = GetListColumns
-	FileBrowser.GetListTextX          = GetListTextX
-	FileBrowser.TruncateText          = TruncateText
-	FileBrowser.GetNumericalFilename  = GetNumericalFilename
+	FileBrowser.GetNodeBounds = GetNodeBounds
+	FileBrowser.GetExpanderBounds = GetExpanderBounds
+	FileBrowser.GetIconBounds = GetIconBounds
+	FileBrowser.GetTextPosition = GetTextPosition
+	FileBrowser.ListTimeWidth = ListTimeWidth
+	FileBrowser.ListSizeWidth = ListSizeWidth
+	FileBrowser.ListHeaderTall = ListHeaderTall
+	FileBrowser.NavBarTall = NavBarTall
+	FileBrowser.GetListColumns = GetListColumns
+	FileBrowser.GetListTextX = GetListTextX
+	FileBrowser.TruncateText = TruncateText
+	FileBrowser.GetNumericalFilename = GetNumericalFilename
 end

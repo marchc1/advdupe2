@@ -1,14 +1,14 @@
 return function(FileBrowser)
-	local SampleSize        = 16
-	local HoverContrast     = 0.06
-	local SelectedContrast  = 0.12
-	local TextContrast      = 0.4
+	local SampleSize = 16
+	local HoverContrast = 0.06
+	local SelectedContrast = 0.12
+	local TextContrast = 0.4
 	local SampleTarget
 
-	local Samples    = setmetatable({}, {__mode = "k"})
-	local Pending    = {}
+	local Samples = setmetatable({}, {__mode = "k"})
+	local Pending = {}
 	local TextColors = setmetatable({}, {__mode = "k"})
-	local HookName   = "FileBrowser_SampleSkins_" .. tostring(Pending)
+	local HookName = "FileBrowser_SampleSkins_" .. tostring(Pending)
 
 	local function GetSkinTextColor(Skin, Alpha)
 		local Cache = TextColors[Skin]
@@ -38,7 +38,7 @@ return function(FileBrowser)
 
 	-- Only used for sampling, the browser draws flat colors
 	local function DrawSkinTexture(Skin, Kind, X, Y, W, H, Fallback)
-		local Tex  = Skin.tex
+		local Tex = Skin.tex
 		local Draw = not Fallback and Tex and Tex.Panels and Tex.Panels[Kind]
 		if Draw then return Draw(X, Y, W, H, color_white) end
 
@@ -47,7 +47,7 @@ return function(FileBrowser)
 	end
 
 	local function DrawSkinExpander(Skin, Expanded, X, Y, W, H)
-		local Tex  = Skin.tex
+		local Tex = Skin.tex
 		local Draw = Tex and (Expanded and Tex.TreeMinus or Tex.TreePlus)
 		if Draw then return Draw(X, Y, W, H) end
 
@@ -94,7 +94,7 @@ return function(FileBrowser)
 	local function GetOverlay(Base, Target, Contrast)
 		local BaseLum, TargetLum = Luminance(Base), Luminance(Target)
 		local CanLighten = BaseLum + Contrast <= 1
-		local CanDarken  = BaseLum - Contrast >= 0
+		local CanDarken = BaseLum - Contrast >= 0
 
 		if CanLighten and (TargetLum >= BaseLum or not CanDarken) then
 			local Want = BaseLum + Contrast
@@ -124,9 +124,9 @@ return function(FileBrowser)
 
 	local function PickTextColor(Skin, Background)
 		local BackgroundLum = Luminance(Background)
-		local Colours       = istable(Skin.Colours) and Skin.Colours or {}
-		local Tree          = istable(Colours.Tree) and Colours.Tree or {}
-		local Label         = istable(Colours.Label) and Colours.Label or {}
+		local Colours = istable(Skin.Colours) and Skin.Colours or {}
+		local Tree = istable(Colours.Tree) and Colours.Tree or {}
+		local Label = istable(Colours.Label) and Colours.Label or {}
 
 		for _, Col in ipairs({Tree.Normal, Skin.colTextEntryText, Label.Dark, Label.Default, Label.Bright}) do
 			if istable(Col) and isnumber(Col.r) and math.abs(Luminance(Col) - BackgroundLum) >= TextContrast then
@@ -156,7 +156,7 @@ return function(FileBrowser)
 		Sample.Panel = Skin.bg_color_bright or Sample.Normal
 
 		if not IsAcceptable(Sample.Normal, Sample.Bright) then
-			Sample.HoverOverlay    = GetOverlay(Sample.Normal, Sample.Bright, HoverContrast)
+			Sample.HoverOverlay = GetOverlay(Sample.Normal, Sample.Bright, HoverContrast)
 			Sample.SelectedOverlay = GetOverlay(Sample.Normal, Sample.Bright, SelectedContrast)
 		end
 
@@ -165,12 +165,12 @@ return function(FileBrowser)
 		end
 
 		Sample.Text = {
-			Normal   = PickTextColor(Skin, Sample.Normal),
-			Hovered  = PickTextColor(Skin, Blend(Sample.Bright, Sample.HoverOverlay)),
+			Normal = PickTextColor(Skin, Sample.Normal),
+			Hovered = PickTextColor(Skin, Blend(Sample.Bright, Sample.HoverOverlay)),
 			Selected = PickTextColor(Skin, Blend(Sample.Bright, Sample.SelectedOverlay)),
-			Target   = PickTextColor(Skin, Blend(Sample.Highlight, Sample.HighlightOverlay)),
-			Dark     = PickTextColor(Skin, Sample.Dark),
-			Panel    = PickTextColor(Skin, Sample.Panel),
+			Target = PickTextColor(Skin, Blend(Sample.Highlight, Sample.HighlightOverlay)),
+			Dark = PickTextColor(Skin, Sample.Dark),
+			Panel = PickTextColor(Skin, Sample.Panel),
 		}
 
 		return Sample
@@ -196,7 +196,7 @@ return function(FileBrowser)
 		end
 	end
 
-	local StatePanels   = {Normal = "Normal", Hovered = "Bright", Selected = "Bright", Target = "Highlight", Dark = "Dark", Panel = "Panel"}
+	local StatePanels = {Normal = "Normal", Hovered = "Bright", Selected = "Bright", Target = "Highlight", Dark = "Dark", Panel = "Panel"}
 	local StateOverlays = {Hovered = "HoverOverlay", Selected = "SelectedOverlay", Target = "HighlightOverlay"}
 
 	local function GetStateTextColor(Skin, State)
@@ -220,7 +220,7 @@ return function(FileBrowser)
 	local function DrawSkinState(Skin, State, X, Y, W, H)
 		DrawSkinPanel(Skin, StatePanels[State], X, Y, W, H)
 
-		local Sample  = GetSkinSample(Skin)
+		local Sample = GetSkinSample(Skin)
 		local Overlay = Sample and StateOverlays[State] and Sample[StateOverlays[State]]
 		if Overlay then
 			surface.SetDrawColor(Overlay)
@@ -230,11 +230,11 @@ return function(FileBrowser)
 		return GetStateTextColor(Skin, State)
 	end
 
-	FileBrowser.DrawSkinState     = DrawSkinState
-	FileBrowser.GetSkinSample     = GetSkinSample
-	FileBrowser.GetSkinTextColor  = GetSkinTextColor
+	FileBrowser.DrawSkinState = DrawSkinState
+	FileBrowser.GetSkinSample = GetSkinSample
+	FileBrowser.GetSkinTextColor = GetSkinTextColor
 	FileBrowser.GetStateTextColor = GetStateTextColor
-	FileBrowser.DrawSkinPanel     = DrawSkinPanel
+	FileBrowser.DrawSkinPanel = DrawSkinPanel
 	FileBrowser.GetSkinPanelColor = GetSkinPanelColor
-	FileBrowser.DrawSkinExpander  = DrawSkinExpander
+	FileBrowser.DrawSkinExpander = DrawSkinExpander
 end

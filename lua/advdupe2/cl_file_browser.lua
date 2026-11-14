@@ -1,4 +1,4 @@
-local FileBrowser    = include("advdupe2/file_browser/init.lua")
+local FileBrowser = include("advdupe2/file_browser/init.lua")
 local DataFolderRoot = FileBrowser.DataFolderRoot
 
 AdvDupe2.FileBrowserLibrary = FileBrowser
@@ -46,7 +46,7 @@ local function OpenPreview(Node)
 end
 
 local AdvDupe2Root = DataFolderRoot("Advanced Duplicator 2", AdvDupe2.DataFolder)
-AdvDupe2Root.Area  = AdvDupe2.AREA_ADVDUPE2
+AdvDupe2Root.Area = AdvDupe2.AREA_ADVDUPE2
 
 function AdvDupe2Root:Init(Browser, Node)
 	DataFolderRoot.Init(self, Browser, Node)
@@ -121,7 +121,7 @@ local function GetNodePath(_, Node)
 end
 
 local function GetFullPath(_, Node)
-	local BasePath     = Node.Root.RootImpl.BasePath
+	local BasePath = Node.Root.RootImpl.BasePath
 	local RelativePath = GetNodeDataPath(Node)
 
 	if RelativePath == "" then
@@ -143,3 +143,44 @@ function AdvDupe2.CreateFileBrowser(Parent)
 	Panel.GetFullPath = GetFullPath
 	return Panel
 end
+
+-- For files written outside the browser (map saves). Creates any missing folder nodes on the way
+local function AddExternalDataFile(Browser, Path)
+	local Node = Browser:FindFolderByPath(AdvDupe2.DataFolder)
+	if not Node then return end
+
+	local Folders = string.sub(string.GetPathFromFilename(Path), #AdvDupe2.DataFolder + 2, -2)
+	for _, Name in ipairs(string.Explode("/", Folders)) do
+		-- unloaded folders pick the file up when they load
+		if Node.FirstObserved then return end
+
+		local FolderPath = Node.Path .. "/" .. Name
+		local Next
+		for _, Folder in ipairs(Node.Folders) do
+			if Folder.Path == FolderPath then Next = Folder break end
+		end
+
+		if not Next then
+			Next = Node:AddDataFolder(FolderPath)
+			Node:MarkSortDirty()
+		end
+
+		Node = Next
+	end
+
+	if Node.FirstObserved or Node:FindFileByPath(Path) then return end
+
+	Node:AddDataFile(Path)
+	Node:MarkSortDirty()
+end
+
+net.Receive("AdvDupe2_MapSaved", function()
+	local Path = net.ReadString()
+	-- Only there when we share the server's data folder (singleplayer/listen host)
+	if not file.Exists(Path, "DATA") then return end
+
+	local Panel = AdvDupe2.FileBrowser
+	if not IsValid(Panel) then return end
+
+	AddExternalDataFile(Panel.Browser, Path)
+end)

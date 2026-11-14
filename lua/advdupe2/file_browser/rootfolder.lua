@@ -2,30 +2,30 @@ return function(FileBrowser)
 	-- This interface describes the logic behind a root folder.
 
 	local IRootFolder_MT = {}
-	local IRootFolder    = setmetatable({}, IRootFolder_MT)
+	local IRootFolder = setmetatable({}, IRootFolder_MT)
 
 	do
 		FileBrowser.IRootFolder = IRootFolder -- If other addons want to post-verify their IRootFolder implementations like we do
 
 		-- todo; debug.getinfo and determine argument counts to further sanity check?
-		IRootFolder.Init             = function(Impl, Browser, Node) end
-		IRootFolder.GetFolderName    = function(Impl) end
+		IRootFolder.Init = function(Impl, Browser, Node) end
+		IRootFolder.GetFolderName = function(Impl) end
 		IRootFolder.GetPlaceholderText = function(Impl, Field) end
-		IRootFolder.GetNameFilter    = function(Impl) end
+		IRootFolder.GetNameFilter = function(Impl) end
 		-- These define node operations
 		-- These are RAW operations, as in the underlying Browser might do some prompts first
 		-- But for example, calling IRootFolder:UserDelete() is expected to actually delete the node
 		-- (and the browser will create the prompt)
-		IRootFolder.UserLoad         = function(Impl, Browser, Node) end
-		IRootFolder.UserPreview      = function(Impl, Browser, Node) end
-		IRootFolder.UserSave         = function(Impl, Browser, Node, Filename, Description) end
-		IRootFolder.UserRename       = function(Impl, Browser, Node, RenameTo) end
-		IRootFolder.UserMove         = function(Impl, Browser, Node, TargetFolder) end
-		IRootFolder.UserMenu         = function(Impl, Browser, Node, Menu) end
-		IRootFolder.UserDelete       = function(Impl, Browser, Node) end
-		IRootFolder.UserMakeFolder   = function(Impl, Browser, Node, Foldername) end
-		IRootFolder.UserGetModTime   = function(Impl, Browser, Node) return 0 end
-		IRootFolder.UserGetSize      = function(Impl, Browser, Node) return 0 end
+		IRootFolder.UserLoad = function(Impl, Browser, Node) end
+		IRootFolder.UserPreview = function(Impl, Browser, Node) end
+		IRootFolder.UserSave = function(Impl, Browser, Node, Filename, Description) end
+		IRootFolder.UserRename = function(Impl, Browser, Node, RenameTo) end
+		IRootFolder.UserMove = function(Impl, Browser, Node, TargetFolder) end
+		IRootFolder.UserMenu = function(Impl, Browser, Node, Menu) end
+		IRootFolder.UserDelete = function(Impl, Browser, Node) end
+		IRootFolder.UserMakeFolder = function(Impl, Browser, Node, Foldername) end
+		IRootFolder.UserGetModTime = function(Impl, Browser, Node) return 0 end
+		IRootFolder.UserGetSize = function(Impl, Browser, Node) return 0 end
 
 		-- Ensures the implementor implemented the interface correctly
 		-- if they didn't throw non-halting errors since it might be an optional method
@@ -41,7 +41,7 @@ return function(FileBrowser)
 	end
 
 	local DataFolderRoot_MT = {}
-	local DataFolderRoot    = setmetatable({}, DataFolderRoot_MT)
+	local DataFolderRoot = setmetatable({}, DataFolderRoot_MT)
 
 	do
 		FileBrowser.DataFolderRoot = DataFolderRoot
@@ -51,8 +51,8 @@ return function(FileBrowser)
 			if BasePath == nil then return error("Cannot create a data folder root without a base path") end
 
 			return setmetatable({
-				Name       = Name,
-				BasePath   = BasePath,
+				Name = Name,
+				BasePath = BasePath,
 				NameFilter = "[^%w_ ]",
 				-- Key-weak LUT's for size/modtimes.
 				-- They're key-weak so if a node gets deleted it isn't hung up by GC thinking
@@ -73,7 +73,7 @@ return function(FileBrowser)
 
 		local function GetFreeDataPath(Directory, Name, Extension)
 			local Suffix = Extension and ("." .. Extension) or ""
-			local Path   = Directory .. Name .. Suffix
+			local Path = Directory .. Name .. Suffix
 			if not file.Exists(Path, "DATA") then return Path end
 
 			for I = 1, 256 do
@@ -104,7 +104,7 @@ return function(FileBrowser)
 			if RenameTo == Node.Text then return true end
 
 			local Extension = string.GetExtensionFromFilename(Node.Path)
-			local NewPath   = GetFreeDataPath(string.GetPathFromFilename(Node.Path), RenameTo, Extension)
+			local NewPath = GetFreeDataPath(string.GetPathFromFilename(Node.Path), RenameTo, Extension)
 
 			if not NewPath or not file.Rename(Node.Path, NewPath) then return false end
 
@@ -118,8 +118,8 @@ return function(FileBrowser)
 			if not Node:IsFile() or not TargetFolder:IsFolder() then return false end
 
 			local Extension = string.GetExtensionFromFilename(Node.Path)
-			local Name      = string.StripExtension(string.GetFileFromFilename(Node.Path))
-			local NewPath   = GetFreeDataPath(TargetFolder.Path .. "/", Name, Extension)
+			local Name = string.StripExtension(string.GetFileFromFilename(Node.Path))
+			local NewPath = GetFreeDataPath(TargetFolder.Path .. "/", Name, Extension)
 
 			if not NewPath or not file.Rename(Node.Path, NewPath) then return false end
 
@@ -132,19 +132,19 @@ return function(FileBrowser)
 
 		function DataFolderRoot:UserMenu(Browser, Node, Menu)
 			if Node:IsFile() then
-				Menu:AddOption("Open",    function() self:UserLoad(Browser, Node)  end, "icon16/page_go.png")
+				Menu:AddOption("Open", function() self:UserLoad(Browser, Node) end, "icon16/page_go.png")
 				Menu:AddOption("Preview", function() self:UserPreview(Browser, Node) end, "icon16/information.png")
 				Menu:AddSpacer()
 				Menu:AddOption("Rename...", function() Browser:StartRename(Node) end, "icon16/textfield_rename.png")
-				Menu:AddOption("Move...",   function() Browser:StartMove(Node)   end, "icon16/arrow_right.png")
+				Menu:AddOption("Move...", function() Browser:StartMove(Node) end, "icon16/arrow_right.png")
 				if self:CanDeleteNode(Node) then
 					Menu:AddOption("Delete", function() Browser:StartDelete(Node) end, "icon16/bin_closed.png")
 				end
 			else
-				Menu:AddOption("Save",       function() Browser:StartSave(Node)   end, "icon16/disk.png")
+				Menu:AddOption("Save", function() Browser:StartSave(Node) end, "icon16/disk.png")
 				Menu:AddOption("New Folder", function() Browser:StartFolder(Node) end, "icon16/folder_add.png")
 				Menu:AddSpacer()
-				Menu:AddOption("Search",     function() Browser:StartSearch(Node) end, "icon16/magnifier.png")
+				Menu:AddOption("Search", function() Browser:StartSearch(Node) end, "icon16/magnifier.png")
 				if self:CanDeleteNode(Node) then
 					Menu:AddOption("Delete", function() Browser:StartDelete(Node) end, "icon16/bin_closed.png")
 				end
