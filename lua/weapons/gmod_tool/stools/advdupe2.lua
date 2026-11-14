@@ -1289,8 +1289,6 @@ if(CLIENT) then
 		Check:SetTooltip("Copy entities outside of the area copy that are constrained to entities insde")
 		CPanel:AddItem(Check)
 
-		AddSpacer(CPanel)
-
 		Check = vgui.Create("DCheckBoxLabel")
 		Check:SetText( "Sort constraints by their connections" )
 		Check:SetDark(true)
@@ -1340,8 +1338,6 @@ if(CLIENT) then
 		NumSlider:SetConVar( "advdupe2_area_copy_size" )
 		NumSlider:SetTooltip("Change the size of the area copy")
 		CPanel:AddItem(NumSlider)
-
-		AddSpacer(CPanel)
 
 		local Category1 = vgui.Create("DCollapsibleCategory")
 		CPanel:AddItem(Category1)
