@@ -941,7 +941,11 @@ return function(FileBrowser)
 	-- This stuff is kinda weird, but doesnt run that much and seems to be pretty OK. Real docking seems to cause
 	-- layout issues that I would rather not deal with.
 	function BROWSER:ThinkAboutUserPrompts()
-		local StackDocks = self.StackDocks or {}
+		local StackDocks = self.StackDocks
+		if not StackDocks then
+			StackDocks = {}
+			self.StackDocks = StackDocks
+		end
 		StackDocks[TOP] = 0
 		StackDocks[LEFT] = 0
 		StackDocks[RIGHT] = 0

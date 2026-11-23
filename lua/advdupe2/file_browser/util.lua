@@ -87,120 +87,89 @@ return function(FileBrowser)
 	end
 
 	-- Defines GetNumericalFilename
-	-- May need optimization and refactoring later - especially for non-ASCII strings...
-	-- This handles things very similarly to how Windows does in terms of sorting, but also adds sorting by month
-	-- May also be a good idea in the future to add a setting for the above functionality.
+	-- Turns a filename into a list of numbers that can be compared element by element.
+	-- This handles things very similarly to how Windows does in terms of sorting (digit runs compare as numbers,
+	-- letters are case-insensitive), but also sorts month names by their month number.
 	local GetNumericalFilename
 	do
-		local isDigit = {
-			['0'] = 0,
-			['1'] = 1,
-			['2'] = 2,
-			['3'] = 3,
-			['4'] = 4,
-			['5'] = 5,
-			['6'] = 6,
-			['7'] = 7,
-			['8'] = 8,
-			['9'] = 9
-		}
+		local Digits = {}
+		for I = 0, 9 do Digits[tostring(I)] = I end
 
-		-- faster than string.byte calls
-		local char2byte = {}
-		for i = 1, 255 do char2byte[string.char(i)] = string.byte(string.lower(string.char(i))) end
-		char2byte['_'] = 2000
+		-- Lowercased byte per character; underscore sorts after everything else
+		local CharToByte = {}
+		for I = 1, 255 do CharToByte[string.char(I)] = string.byte(string.lower(string.char(I))) end
+		CharToByte["_"] = 2000
 
-		local buildMonth = {}
-		for k, v in ipairs{"january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"} do
-			local tbl = buildMonth
-			for i = 1, #v do
-				local c = v[i]
-				if i == #v then
-					tbl[c] = k
-				else
-					if not tbl[c] then
-						tbl[c] = {}
-					end
+		local MonthNames = {"january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"}
+		local MonthSeparators = {[""] = true, [" "] = true, ["_"] = true, ["-"] = true}
 
-					tbl = tbl[c]
+		-- Numbers at the very start of a name sort before everything else
+		local LeadingNumberOffset = 100000000
+		local MaxCached = 8192
+
+		-- A month only counts as a whole word: it must start the name or follow a separator, and end the name or precede one
+		local function MatchMonth(Lower, Position)
+			if not MonthSeparators[string.sub(Lower, Position - 1, Position - 1)] then return end
+
+			for Month = 1, #MonthNames do
+				local MonthName = MonthNames[Month]
+				local EndPosition = Position + #MonthName - 1
+
+				if string.sub(Lower, Position, EndPosition) == MonthName and MonthSeparators[string.sub(Lower, EndPosition + 1, EndPosition + 1)] then
+					return Month, #MonthName
 				end
 			end
 		end
 
-		local numericalStore = {}
-		function GetNumericalFilename(name)
-			if numericalStore[name] then return numericalStore[name] end
+		local NumericalStore, NumericalCount = {}, 0
+		function GetNumericalFilename(Name)
+			local Cached = NumericalStore[Name]
+			if Cached then return Cached end
 
-			local ret = {}
-			local digit = nil
-			local monthTester = buildMonth
-			local monthStoreJustInCase = {}
+			local Lower = string.lower(Name)
+			local Length = #Lower
+			local Result, Count = {}, 0
+			local Position = 1
 
-			local function testMonth(i, c)
-				monthTester = monthTester[c]
-				monthStoreJustInCase[#monthStoreJustInCase + 1] = char2byte[c]
-				if type(monthTester) == "number" then
-					local nextC = name[i + 1]
-					local nextIfine = nextC == ' ' or nextC == '_' or nextC == '-'
-					if i == #name or nextIfine then
-						ret[#ret + 1] = monthTester
-						monthStoreJustInCase = {}
-						monthTester = buildMonth
-						if nextIfine then
-							i = i + 1
-						end
-					else
-						for i2 = 1, #monthStoreJustInCase do
-							ret[#ret + 1] = monthStoreJustInCase[i2]
-						end
-						monthStoreJustInCase = {}
-						monthTester = buildMonth
+			while Position <= Length do
+				local Char = string.sub(Lower, Position, Position)
+				local Digit = Digits[Char]
+
+				if Digit then
+					local Value = 0
+
+					while Digit do
+						Value = (Value * 10) + Digit
+						Position = Position + 1
+						Digit = Digits[string.sub(Lower, Position, Position)]
 					end
-				end
-			end
 
-			local function finalTest(i, c)
-				if monthTester ~= buildMonth then
-					for i2 = 1, #monthStoreJustInCase do
-						ret[#ret + 1] = monthStoreJustInCase[i2]
-					end
-					monthStoreJustInCase = {}
-					monthTester = buildMonth
-				end
-				ret[#ret + 1] = char2byte[c]
-			end
-
-			for i = 1, #name do
-				local c = name[i]
-				local cIsDigit = isDigit[c]
-				if cIsDigit then
-					if digit == nil then
-						digit = 0
-					end
-					digit = (digit * 10) + cIsDigit
+					if Count == 0 then Value = Value - LeadingNumberOffset end
+					Count = Count + 1
+					Result[Count] = Value
 				else
-					if monthTester[c] then
-						testMonth(i, c)
-					elseif digit ~= nil then
-						ret[#ret + 1] = digit - (#ret == 0 and 100000000 or 0)
-						digit = nil
+					local Month, MonthLength = MatchMonth(Lower, Position)
+
+					if Month then
+						Count = Count + 1
+						Result[Count] = Month
+						Position = Position + MonthLength
 					else
-						finalTest(i, c)
+						Count = Count + 1
+						Result[Count] = CharToByte[Char]
+						Position = Position + 1
 					end
 				end
 			end
 
-			if digit ~= nil then
-				ret[#ret + 1] = digit - (#ret == 0 and 100000000 or 0)
+			-- Cache so this doesn't have to be calculated multiple times, but don't let it grow forever
+			if NumericalCount >= MaxCached then
+				NumericalStore, NumericalCount = {}, 0
 			end
-			if monthTester ~= buildMonth then
-				for i = 1, #monthStoreJustInCase do
-					ret[#ret + 1] = monthStoreJustInCase[i]
-				end
-			end
+			NumericalStore[Name] = Result
+			NumericalCount = NumericalCount + 1
 
-			numericalStore[name] = ret -- store so this doesnt have to be calculated multiple times for no reason
-			return ret
+			return Result
 		end
 	end
 

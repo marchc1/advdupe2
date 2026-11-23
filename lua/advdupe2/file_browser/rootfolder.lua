@@ -53,12 +53,7 @@ return function(FileBrowser)
 			return setmetatable({
 				Name = Name,
 				BasePath = BasePath,
-				NameFilter = "[^%w_ ]",
-				-- Key-weak LUT's for size/modtimes.
-				-- They're key-weak so if a node gets deleted it isn't hung up by GC thinking
-				-- we care about the reference still
-				SizeCache = setmetatable({}, {__mode = 'k'}),
-				TimeCache = setmetatable({}, {__mode = 'k'})
+				NameFilter = "[^%w_ ]"
 			}, {__index = DataFolderRoot})
 		end
 
@@ -180,24 +175,15 @@ return function(FileBrowser)
 			return true
 		end
 
+		-- The nodes cache their own time/size (and reset it when they are renamed or moved)
 		function DataFolderRoot:UserGetModTime(Browser, Node)
-			local Time = self.TimeCache[Node]
-			if Time then return Time end
-
-			Time = file.Time(Node.Path, "DATA")
-			self.TimeCache[Node] = Time
-			return Time
+			return Node:GetTime()
 		end
 
 		function DataFolderRoot:UserGetSize(Browser, Node)
 			if Node:IsFolder() then return -1 end
 
-			local Size = self.SizeCache[Node]
-			if Size then return Size end
-
-			Size = file.Size(Node.Path, "DATA")
-			self.SizeCache[Node] = Size
-			return Size
+			return Node:GetSize()
 		end
 	end
 end

@@ -629,7 +629,7 @@ return function(FileBrowser)
 
 	function BROWSERTREE:Think()
 		local Settings = self.Settings
-		Settings:Flush()
+		if Settings.Dirty then Settings:Flush() end
 		if self.LastTileHeight ~= Settings.TileHeight or self.LastNodeHeight ~= Settings.TallOfOneNode then
 			self.LastTileHeight, self.LastNodeHeight = Settings.TileHeight, Settings.TallOfOneNode
 			self.SortDirty = true

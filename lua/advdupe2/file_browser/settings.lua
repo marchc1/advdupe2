@@ -45,7 +45,11 @@ return function(FileBrowser)
 
 		for _, Definition in ipairs(Definitions) do
 			local Key, Name, Default, Help, Min, Max = unpack(Definition)
-			Settings.ConVars[Key] = CreateClientConVar(ConVarPrefix .. "_menu_" .. Name, Default, true, false, Help, Min, Max)
+			local ConVar = CreateClientConVar(ConVarPrefix .. "_menu_" .. Name, Default, true, false, Help, Min, Max)
+			Settings.ConVars[Key] = ConVar
+
+			-- Only re-read the convars when one of them actually changed (see SETTINGS:Flush)
+			cvars.AddChangeCallback(ConVar:GetName(), function() Settings.Dirty = true end, "FileBrowser_" .. ConVarPrefix .. "_" .. Key)
 		end
 
 		Settings:Flush()
@@ -98,6 +102,7 @@ return function(FileBrowser)
 
 	function SETTINGS:Flush()
 		local ConVars = self.ConVars
+		self.Dirty = false
 
 		self.MaxTimeToDoubleClick = ConVars.MaxTimeToDoubleClick:GetFloat()
 		self.NodeTall = math.max(ConVars.NodeTall:GetFloat(), 1)
