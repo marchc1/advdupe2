@@ -386,11 +386,6 @@ return function(FileBrowser)
 
 		local MouseX, MouseY = self:CursorPos()
 		local CanInput = self:IsMouseInputEnabled()
-		local Now = UserInterfaceTimeFunc()
-
-		ImmediateState.LastTime = ImmediateState.Time or Now
-		ImmediateState.Time = Now
-		ImmediateState.DeltaTime = ImmediateState.Time - ImmediateState.LastTime
 
 		ImmediateState.Mouse.Cursor = "arrow"
 		ImmediateState.LastScroll = ImmediateState.Scroll or Scroll
@@ -630,13 +625,6 @@ return function(FileBrowser)
 				end
 			end
 		end
-
-		ImmediateState.BlockingAlpha = math.Clamp((ImmediateState.BlockingAlpha or 0) + (ImmediateState.DeltaTime * 4 * (ImmediateState.CanInput and -1 or 1)), 0, 1)
-		if ImmediateState.BlockingAlpha > 0 then
-			-- The tree is at least as tall as the browser, so this covers it without unclipping
-			surface.SetDrawColor(0, 0, 0, ImmediateState.BlockingAlpha * 66)
-			surface.DrawRect(0, 0, PanelWidth, self.Browser:GetTall())
-		end
 	end
 
 	function BROWSERTREE:Think()
@@ -653,7 +641,7 @@ return function(FileBrowser)
 		-- ... then consider the current state.
 		self:ConsiderCurrentState()
 		-- FlushImmediateState fetches information from the VGUI panel and tests against that information.
-		-- ConsiderCurrentState, given the work that FlushImmediateState did, will trigger events and set some 
+		-- ConsiderCurrentState, given the work that FlushImmediateState did, will trigger events and set some
 		-- VGUI panel data (cursor for example).
 	end
 

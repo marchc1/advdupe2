@@ -9,8 +9,6 @@ return function(FileBrowser)
 	end
 
 	local Definitions = {
-		{"PromptOpenTime", "promptopentime", "0.2", "The time it takes for a user-prompt to fully open, in seconds.", 0, 1000000},
-		{"PromptCloseTime", "promptclosetime", "0.3", "The time it takes for a user-prompt to fully close, in seconds.", 0, 1000000},
 		{"ViewType", "viewtype", "0", "The file browser view. 0 = tree, 1 = list, 2 = tiles.", 0, 2},
 		{"MaxTimeToDoubleClick", "maxtimetodoubleclick", "0.25", "Max time delta between clicks to count as a double click, in seconds.", 0, 1000000},
 		{"NodeTall", "nodetall", "24", "How tall a single file/directory node is in the file browser, in pixels.", 0, 1000000},
@@ -100,9 +98,6 @@ return function(FileBrowser)
 
 	function SETTINGS:Flush()
 		local ConVars = self.ConVars
-
-		self.PromptOpenTime = ConVars.PromptOpenTime:GetFloat()
-		self.PromptCloseTime = ConVars.PromptCloseTime:GetFloat()
 
 		self.MaxTimeToDoubleClick = ConVars.MaxTimeToDoubleClick:GetFloat()
 		self.NodeTall = math.max(ConVars.NodeTall:GetFloat(), 1)

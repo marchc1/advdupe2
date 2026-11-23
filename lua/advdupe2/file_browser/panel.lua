@@ -580,8 +580,6 @@ return function(FileBrowser)
 			end
 		end
 
-		CreateConvarSlider("PromptOpenTime", "Prompt Open Time", 0, 1, 2)
-		CreateConvarSlider("PromptCloseTime", "Prompt Close Time", 0, 1, 2)
 		CreateConvarSlider("MaxTimeToDoubleClick", "Double Click Time", 0.1, 1, 2)
 		CreateDivider()
 		CreateConvarSlider("NodeTall", "Node Height", 12, 64)

@@ -1,5 +1,4 @@
 return function(FileBrowser)
-	local UserInterfaceTimeFunc = FileBrowser.UserInterfaceTimeFunc
 	local DrawSkinPanel = FileBrowser.DrawSkinPanel
 	local GetSkinTextColor = FileBrowser.GetSkinTextColor
 	local GetStateTextColor = FileBrowser.GetStateTextColor
@@ -28,12 +27,8 @@ return function(FileBrowser)
 
 	do
 		function USERPROMPT:Init(Browser)
-			local Settings = Browser.Settings
 			self.Browser = Browser
 			self.Blocking = false
-
-			self.StartOpen = UserInterfaceTimeFunc()
-			self.WillOpenAt = self.StartOpen + Settings.PromptOpenTime
 
 			self.Panel = Browser:Add("DScrollPanel")
 			self.Panel.Paint = PaintUserPrompt
@@ -68,36 +63,16 @@ return function(FileBrowser)
 			self.Dock = Dock
 		end
 
-		-- Covers the whole browser with no animation, for things like the settings page
+		-- Covers the whole browser, for things like the settings page
 		function USERPROMPT:SetCover(Cover)
 			self.Cover = Cover and true or false
-		end
-
-		local function Normalize(X, Min, Max)
-			if Max <= Min then return X >= Max and 1 or 0 end
-			return math.Clamp((X - Min) / (Max - Min), 0, 1)
-		end
-
-		function USERPROMPT:GetAnimationRatio(Now)
-			if self.Cover then return 1 end
-
-			local OpenRatio = Normalize(Now, self.StartOpen, self.WillOpenAt)
-			local CloseRatio = self.Closing and (1 - Normalize(Now, self.StartClose, self.WillCloseAt)) or 1
-
-			return math.min(OpenRatio, CloseRatio)
 		end
 
 		local DockPadding = 4
 
 		function USERPROMPT:DoThink()
-			local Now = UserInterfaceTimeFunc()
-			local Closing = self.Closing
+			if self.Closing then return false end
 
-			if Closing and (self.Cover or Now >= self.WillCloseAt) then
-				return false
-			end
-
-			local Ratio = self:GetAnimationRatio(Now)
 			local Browser = self.Browser
 			local ParentWidth, ParentHeight = Browser:GetWide(), Browser:GetTall()
 
@@ -116,11 +91,10 @@ return function(FileBrowser)
 				SizeH = math.ceil(ContentTall)
 				PosX = DockPadding
 
-				local Slide = math.ceil((1 - Ratio) * (SizeH + DockPadding))
 				if Dock == TOP then
-					PosY = DockPadding - Slide
+					PosY = DockPadding
 				else
-					PosY = ParentHeight - SizeH - DockPadding + Slide
+					PosY = ParentHeight - SizeH - DockPadding
 				end
 			elseif Dock == FILL then
 				SizeW = math.ceil(ContentWide - (DockPadding * 2))
@@ -131,21 +105,18 @@ return function(FileBrowser)
 
 			self.Panel:SetPos(PosX, PosY)
 			self.Panel:SetSize(SizeW, SizeH)
-			self.Panel:SetAlpha(Ratio * 255)
+			self.Panel:SetAlpha(255)
 
 			return true
 		end
 
-		-- Call this to close and pop later.
+		-- Call this to close; the prompt is removed on the browser's next think.
 		-- This also forces Blocking back to false for main UI panel.
 		function USERPROMPT:Close()
-			local Settings = self.Browser.Settings
 			if self.OnClose and not self.Closing then self:OnClose() end
 
 			self.Blocking = false
 			self.Closing = true
-			self.StartClose = UserInterfaceTimeFunc()
-			self.WillCloseAt = self.StartClose + Settings.PromptCloseTime
 		end
 	end
 

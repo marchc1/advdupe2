@@ -939,7 +939,7 @@ return function(FileBrowser)
 	-- Sets input enabled on user prompt stack and determines if user input should be enabled/disabled on the main browser
 	-- Returns true if input is enabled
 	-- This stuff is kinda weird, but doesnt run that much and seems to be pretty OK. Real docking seems to cause
-	-- layout issues that I would rather not deal with, especially during animation.
+	-- layout issues that I would rather not deal with.
 	function BROWSER:ThinkAboutUserPrompts()
 		local StackDocks = self.StackDocks or {}
 		StackDocks[TOP] = 0
