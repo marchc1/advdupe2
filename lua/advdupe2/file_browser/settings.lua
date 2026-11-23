@@ -14,8 +14,6 @@ return function(FileBrowser)
 		{"NodeTall", "nodetall", "24", "How tall a single file/directory node is in the file browser, in pixels.", 0, 1000000},
 		{"NodePadding", "nodepadding", "0", "The height padding inbetween two nodes, in pixels.", 0, 1000000},
 		{"NodeDepthWidth", "nodedepthwidth", "12", "The width of a single node layer, in pixels. For example a file in folder1/folder2 has a depth of 2, so the pixel width, given the default value, will be (12 * 2) == 24.", 0, 1000000},
-		{"NodeFont", "nodefont", "DermaDefault", "The surface.CreateFont-registered font the file browser uses."},
-		{"NodeFontSmall", "nodefontsmall", "DefaultSmall", "The surface.CreateFont-registered font the file browser uses for smaller fonts."},
 		{"IconFolderEmpty", "nodeicon_folderempty", "icon16/folder.png", "The materials/ localized path for an empty folder."},
 		{"IconFolderContains", "nodeicon_folder", "icon16/folder_page.png", "The materials/ localized path for a folder with contents."},
 		{"IconFile", "nodeicon_file", "icon16/page.png", "The materials/ localized path for a file."},
@@ -109,8 +107,8 @@ return function(FileBrowser)
 		self.NodePadding = math.max(ConVars.NodePadding:GetFloat(), 0)
 		self.TallOfOneNode = self.NodeTall + self.NodePadding
 		self.NodeDepthWidth = ConVars.NodeDepthWidth:GetFloat()
-		self.NodeFont = ConVars.NodeFont:GetString()
-		self.NodeFontSmall = ConVars.NodeFontSmall:GetString()
+		self.NodeFont = "DermaDefault"
+		self.NodeFontSmall = "DefaultSmall"
 
 		self.ExpanderSize = ConVars.ExpanderSize:GetFloat()
 		self.IconSize = ConVars.IconSize:GetFloat()
