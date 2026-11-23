@@ -33,6 +33,15 @@ return function(FileBrowser)
 			self.Panel = Browser:Add("DScrollPanel")
 			self.Panel.Paint = PaintUserPrompt
 			self.Panel:SetAlpha(0)
+
+			-- Swallow the mouse wheel, otherwise once the prompt is scrolled to its end the wheel
+			-- falls through to whatever panel the browser sits in (like the q menu) and scrolls that instead
+			local OnMouseWheeled = self.Panel.OnMouseWheeled
+
+			self.Panel.OnMouseWheeled = function(Panel, Delta)
+				OnMouseWheeled(Panel, Delta)
+				return true
+			end
 		end
 
 		function USERPROMPT:GetPanel() return self.Panel end
